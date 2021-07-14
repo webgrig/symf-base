@@ -1,0 +1,95 @@
+{% extends 'admin/base.html.twig' %}
+
+{% block body %}
+
+    <div class="container-fluid">
+        <div class="row no-gutters">
+            <div class="col-12">
+                <h1 class="display-4 text-center mt-5">{{ title }}</h1>
+            </div>
+        </div>
+
+        {% if(categories is not empty) %}
+
+            <div class="row no-gutters">
+                <div class="col-12 mt-4 mb-4">
+                    <a href="{{ path('admin_post_create') }}" class="btn btn-success">Создать пост</a>
+                </div>
+            </div>
+        {% endif %}
+
+        <div class="row no-gutters justify-content-center">
+            <div class="col-8">
+                {% for message in app.flashes('error') %}
+                    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                        {{ message }}
+                        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                {% endfor %}
+                {% for message in app.flashes('success') %}
+                    <div class="alert alert-success alert-dismissible fade show" role="alert">
+                        {{ message }}
+                        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+        <div class="row no-gutters">
+            <div class="col-12">
+                {% if(categories is empty) %}
+                    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                        <p>Создание постов невозможно. Нет ни одной категории.</p>
+                        <a href="{{ path('admin_category_create') }}">Создать категорию</a>
+                        <hr>
+                    </div>
+                {% else %}
+                    <div class="row no-gutters">
+                        <div class="col-12 mb-4">
+                            <table class="table table-hover border-bottom">
+                                <thead>
+                                <tr>
+                                    <th scope="col">#</th>
+                                    <th scope="col">Заголовок</th>
+                                    <th scope="col">Контент</th>
+                                    <th scope="col">Превью</th>
+                                    <th scope="col" class="w-2">Действия</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+
+                                {% if(category.posts is not defined) %}
+                                    <tr>
+                                        <td colspan="5" class="text-center">
+                                            <span class="text-black-50">Постов нет!</span>
+                                        </td>
+                                    </tr>
+                                {% else %}
+                                    {% for post in catetory.posts %}
+                                        <tr>
+                                            <th scope="row">{{ post.id }}</th>
+                                            <td>{{ post.title }}</td>
+                                            <td>{{ post.content }}</td>
+                                            <td>{% if post.image is null%}
+                                                {% else %}
+                                                    <img src="{{ assets_image_post_path }}{{ post.image }}" alt=""  width="100">
+                                                {% endif %}</td>
+                                            <td><a href="{{ path('admin_post_update', {'id': post.id}) }}"
+                                                   class="bi bi-pencil-square"></a></td>
+                                        </tr>
+
+                                    {% endfor %}
+                                {% endif %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+{% endblock %}

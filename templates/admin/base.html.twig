@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <title>{% block title %}Админочка{% endblock %}</title>
+        {# Run `composer require symfony/webpack-encore-bundle`
+           and uncomment the following Encore helpers to start using Symfony UX #}
+        {% block stylesheets %}
+            {#{{ encore_entry_link_tags('app') }}#}
+{#            <link rel="stylesheet" href="{{ asset('assets/framework/fontawesome-4.7.0/css/font-awesome.min.css') }}">#}
+{#            <link rel="stylesheet" href="{{ asset('assets/framework/bootstrap-4.4.1/css/bootstrap.min.css') }}">#}
+{#            <link rel="stylesheet" href="{{ asset('assets/main/css/style.css') }}">#}
+            {{ encore_entry_link_tags('app') }}
+        {% endblock %}
+    </head>
+    <body>
+
+        <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <a class="navbar-brand border-right" href="{{ path('admin_home') }}">
+            {{ title }}
+            <i class="fa fa-microchip ml-2 mr-2" aria-hidden="true"></i>
+        </a>
+        <div class="collapse navbar-collapse" id="navbarText">
+            <ul class="navbar-nav mr-auto">
+                <li class="nav-item active">
+                    <a class="nav-link" href="{{ path('admin_home') }}">Главная <span class="sr-only">(current)</span></a>
+                </li>
+                <li class="nav-item active">
+                    <a class="nav-link" href="{{ path('admin_user') }}">Пользователи</a>
+                </li>
+                <li class="nav-item active">
+                    <a class="nav-link" href="{{ path('admin_post') }}">Посты</a>
+                </li>
+                <li class="nav-item active">
+                    <a class="nav-link" href="{{ path('admin_category') }}">Категории</a>
+                </li>
+                <li class="nav-item active">
+                    <a class="nav-link" target="_blank" href="{{ path('home') }}">Выход на сайт</a>
+                </li>
+            </ul>
+            <form class="form-inline">
+                <a href="{{ path('app_logout') }}" class="btn btn-outline-info my-2 my-sm-0" type="submit">Выход</a>
+            </form>
+        </div>
+    </nav>
+        {% block body %}{% endblock %}
+
+        {% block javascripts %}
+            {{ encore_entry_script_tags('app') }}
+        {% endblock %}
+    </body>
+</html>
