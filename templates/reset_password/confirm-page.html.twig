@@ -6,14 +6,13 @@
     <div class="container container-fluid">
         <div class="row no-gutters justify-content-center mt-5">
             <div class="col-12 col-lg-6 col-md-6">
-                {% set registrationSuccessMessages = app.session.getFlashBag().get('registration-success')|default(false) %}
-                {% set confirmationSuccessMessages = app.session.getFlashBag().get('confirmation-success')|default(false) %}
-                {% if confirmationSuccessMessages %}
+                {% set resetPasswordSuccessMessages = app.session.getFlashBag().get('success')|default(false) %}
+                {% if resetPasswordSuccessMessages %}
                     <div class="alert alert-success fade show" role="alert">
-                        {{ confirmationSuccessMessages[0] }}
+                        {{ resetPasswordSuccessMessages[0] }}
                         <hr>
                         <div class="text-right mt-3">
-                            <a href="{{ path('app_login') }}">Sign in</a>
+                            You can now <a href="{{ path('app_login') }}">Sign in</a>
                         </div>
                     </div>
                 {% elseif (registrationSuccessMessages)%}

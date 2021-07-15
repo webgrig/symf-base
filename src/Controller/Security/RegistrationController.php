@@ -87,29 +87,6 @@ class RegistrationController extends AbstractController
             );
             $session = $request->getSession();
             $session->getFlashBag()->add('registration-success', 'A message has been sent to your email with a link to confirm registration. Check your email and confirm registration by clicking on this link.');
-
-
-//            $user = $this->get('fos_user.user_manager')->findUserByEmail($email);
-//            dd($user);
-//            $url = $this->generateUrl('fos_user_registration_confirm', array('token' => $user->getConfirmationToken()), true);
-//
-//            $message = \Swift_Message::newInstance()
-//                ->setSubject('Registration confirmation')
-//                ->setFrom('admin@acmedemo.com')
-//                ->setTo($email)
-//                ->setContentType('text/html')
-//                ->setBody(
-//                    $this->renderView(
-//                        "AcmeDemoBundle:Remind:email.html.twig", array(
-//                        'user' => $user,
-//                        'confirmationUrl' => $url))
-//                )
-//            ;
-//            $sent = $this->get('mailer')->send($message);
-//
-//            return ['user' => $user,
-//                'url' => $url,
-//                'success' => $sent ? 'Yes' : 'No'];
         }
         else{
             return $this->redirectToRoute('app_verify_email', ['id' => $user->getId()]);
