@@ -1,0 +1,31 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Register{% endblock %}
+
+{% block body %}
+    <div class="container container-fluid">
+        <div class="row no-gutters justify-content-center mt-5">
+            <div class="col-12 col-lg-6 col-md-6">
+                {% set registrationSuccessMessages = app.session.getFlashBag().get('registration-success')|default(false) %}
+                {% set confirmationSuccessMessages = app.session.getFlashBag().get('confirmation-success')|default(false) %}
+                {% if confirmationSuccessMessages %}
+                    <div class="alert alert-success fade show" role="alert">
+                        {{ confirmationSuccessMessages[0] }}
+                        <hr>
+                        <div class="text-right mt-3">
+                            <a href="{{ path('app_login') }}">Log in</a>
+                        </div>
+                    </div>
+                {% elseif (registrationSuccessMessages)%}
+                    <div class="alert alert-success fade show" role="alert">
+                        {{ registrationSuccessMessages[0] }}
+                        <hr>
+                        <div class="text-right mt-3">
+                            Didn't receive your message? <a href="{{ path('send-confirmation', {'id': id}) }}">Resend</a>
+                        </div>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+{% endblock %}
