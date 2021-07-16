@@ -3,7 +3,6 @@
 namespace App\Controller\Security;
 
 use App\Entity\User;
-use App\Form\RegistrationFormType;
 use App\Form\UserRegisterType;
 use App\Repository\UserRepository;
 use App\Repository\UserRepositoryInterface;
@@ -20,7 +19,6 @@ use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Security\Core\Encoder\UserPasswordEncoderInterface;
 use Symfony\Component\Validator\Constraints\IsTrue;
 use SymfonyCasts\Bundle\VerifyEmail\Exception\VerifyEmailExceptionInterface;
-use function Symfony\Component\String\u;
 
 class RegistrationController extends AbstractController
 {
