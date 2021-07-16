@@ -28,13 +28,20 @@ class UserService
 
     /**
      * @param User $user
+     * @param null $role
      * @return $this
      */
-    public function handleCreate(User $user)
+    public function handleCreate(User $user, $role = NULL, bool $isVerified = NULL)
     {
         $password = $this->passwordEncoder->encodePassword($user, $user->getPlainPassword());
         $user->setPassword($password);
-        $user->setRoles(['ROLE_ADMIN']);
+        if ($role){
+            $user->setRoles([$role]);
+        }
+
+        if ($isVerified){
+            $user->setIsVerified($isVerified);
+        }
 
         $this->userRepository->setCreate($user);
 

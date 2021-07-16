@@ -20,7 +20,7 @@ class RegistrationFormType extends AbstractType
     {
         $builder
             ->add('email')
-            ->add('full_name', TextType::class, [
+            ->add('fullName', TextType::class, [
                 'label' => 'Имя',
                 'attr' => [
                     'placeholder' => 'Введите Имя'

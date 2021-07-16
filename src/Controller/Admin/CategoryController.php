@@ -8,6 +8,7 @@ use App\Entity\Post;
 use App\Form\CategoryType;
 use App\Repository\CategoryRepositoryInterface;
 use App\Service\Category\CategoryService;
+use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -82,7 +83,13 @@ class CategoryController extends BaseController
     public function updateAction(int $id, Request $request)
     {
         $category = $this->categoryRepository->getOneCategory($id);
-        $form = $this->createForm(CategoryType::class, $category);
+        $form = $this->createForm(CategoryType::class, $category)
+            ->add('delete', SubmitType::class, [
+                'label' => 'Удалить',
+                'attr' => [
+                    'class' => 'btn btn-danger ml-3'
+                ]
+            ]);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid())

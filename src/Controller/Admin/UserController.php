@@ -5,7 +5,7 @@ namespace App\Controller\Admin;
 
 
 use App\Entity\User;
-use App\Form\UserLoginType;
+use App\Form\UserRegisterType;
 use App\Repository\UserRepositoryInterface;
 use App\Service\User\UserService;
 use Symfony\Component\HttpFoundation\RedirectResponse;
@@ -51,12 +51,12 @@ class UserController extends BaseController
 
     public function createAction(Request $request){
         $user = new User();
-        $form = $this->createForm(UserLoginType::class, $user);
+        $form = $this->createForm(UserRegisterType::class, $user);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid())
         {
-            $this->userService->handleCreate($user);
+            $this->userService->handleCreate($user, 'ROLE_USER', true);
             $this->addFlash('success', 'Пользователь создан');
             return $this->redirectToRoute('admin_user');
 
@@ -77,7 +77,7 @@ class UserController extends BaseController
     public function updateAction(Request $request, int $id)
     {
         $user = $this->userRepository->getOne($id);
-        $formUser = $this->createForm(UserLoginType::class, $user);
+        $formUser = $this->createForm(UserRegisterType::class, $user);
         $formUser->handleRequest($request);
 
         if ($formUser->isSubmitted() && $formUser->isValid()){

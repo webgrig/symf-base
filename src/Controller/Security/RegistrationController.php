@@ -4,15 +4,21 @@ namespace App\Controller\Security;
 
 use App\Entity\User;
 use App\Form\RegistrationFormType;
+use App\Form\UserRegisterType;
 use App\Repository\UserRepository;
+use App\Repository\UserRepositoryInterface;
 use App\Security\EmailVerifier;
+use App\Service\User\UserService;
 use Symfony\Bridge\Twig\Mime\TemplatedEmail;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
+use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Mime\Address;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Security\Core\Encoder\UserPasswordEncoderInterface;
+use Symfony\Component\Validator\Constraints\IsTrue;
 use SymfonyCasts\Bundle\VerifyEmail\Exception\VerifyEmailExceptionInterface;
 use function Symfony\Component\String\u;
 
@@ -20,9 +26,21 @@ class RegistrationController extends AbstractController
 {
     private $emailVerifier;
 
-    public function __construct(EmailVerifier $emailVerifier)
+    /**
+     * @var UserRepositoryInterface
+     */
+    private $userRepository;
+
+    /**
+     * @var UserService
+     */
+    private $userService;
+
+    public function __construct(EmailVerifier $emailVerifier, UserRepositoryInterface $userRepository, UserService $userService)
     {
         $this->emailVerifier = $emailVerifier;
+        $this->userRepository =  $userRepository;
+        $this->userService = $userService;
     }
 
     /**
@@ -30,30 +48,38 @@ class RegistrationController extends AbstractController
      */
     public function register(Request $request, UserPasswordEncoderInterface $passwordEncoder): Response
     {
+        if ($this->getUser()) {
+            return $this->redirectToRoute('admin_home');
+        }
         $user = new User();
-        $form = $this->createForm(RegistrationFormType::class, $user);
+        $form = $this->createForm(UserRegisterType::class, $user)
+            ->add('agreeTerms', CheckboxType::class, [
+                'mapped' => false,
+                'constraints' => [
+                    new IsTrue([
+                        'message' => 'You should agree to our terms.',
+                    ]),
+                ],
+            ])
+
+            ->add('save', SubmitType::class, [
+                'label' => 'Зарегистрироваться',
+                'attr' => [
+                    'class' => 'btn btn-block btn-primary mt-3'
+                ]
+            ]);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            // encode the plain password
-            $user->setPassword(
-                $passwordEncoder->encodePassword(
-                    $user,
-                    $form->get('plainPassword')->getData()
-                )
-            );
 
-            $entityManager = $this->getDoctrine()->getManager();
-            $entityManager->persist($user);
-            $entityManager->flush();
-            // do anything else you need here, like send an email
+            $this->userService->handleCreate($user, 'ROLE_USER');
             return $this->redirectToRoute('send-confirmation', [
                 'id' => $user->getId()
             ]);
         }
 
         return $this->render('registration/register.html.twig', [
-            'registrationForm' => $form->createView(),
+            'form' => $form->createView(),
         ]);
     }
 
@@ -110,6 +136,11 @@ class RegistrationController extends AbstractController
 
         if (null === $user) {
             return $this->redirectToRoute('app_register');
+        }
+
+        if ($user->isVerified())
+        {
+            return $this->redirectToRoute('app_login');
         }
 
         // validate email confirmation link, sets User::isVerified=true and persists

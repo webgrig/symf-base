@@ -12,14 +12,7 @@
                 {% endfor %}
                 <div class="form-login shadow-lg p-4">
                     <h1 class="h3 mb-3 font-weight-normal text-center">Please sign up</h1>
-                    {{ form_start(registrationForm) }}
-                    {{ form_row(registrationForm.full_name) }}
-                    {{ form_row(registrationForm.email) }}
-                    {{ form_row(registrationForm.plainPassword) }}
-                    {{ form_row(registrationForm.agreeTerms) }}
-
-                    <button type="submit" class="btn btn-block btn-primary mt-3">Register</button>
-                    {{ form_end(registrationForm) }}
+                    {{ form(form) }}
                     <div class="text-right mt-3">
                         <a href="{{ path('app_login') }}" class="mr-3">Вход</a>
                         <a href="{{ path('app_forgot_password_request') }}">Напомнить пароль</a>

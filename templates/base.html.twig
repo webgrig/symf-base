@@ -28,7 +28,8 @@
                 {% if is_granted('IS_AUTHENTICATED_FULLY') %}
                     <a href="{{ path('admin_home') }}" class="btn btn-outline-success my-2 my-sm-0" type="submit">Админочка</a>
                 {% else %}
-                    <a href="{{ path('admin_home') }}" class="btn btn-outline-success my-2 my-sm-0" type="submit">Вход</a>
+                    <a href="{{ path('admin_home') }}" class="btn btn-outline-success my-2 my-sm-0 mr-2" type="submit">Вход</a>
+                    <a href="{{ path('app_register') }}" class="btn btn-outline-success my-2 my-sm-0" type="submit">Регистрация</a>
                 {% endif %}
             </form>
         </div>
