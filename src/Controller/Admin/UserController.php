@@ -53,7 +53,8 @@ class UserController extends BaseController
         $form = $this->userService->createForm($request, $user, [
             'save' => [
                 "label" => "Создать"
-            ]
+            ],
+            'roles' => true
         ]);
         if ($form->isSubmitted() && $form->isValid())
         {
@@ -80,6 +81,7 @@ class UserController extends BaseController
     {
         $user = $this->userRepository->getOne($id);
         $form = $this->userService->createForm($request, $user, [
+            'roles' => true,
             'save' => [
                 "label" => "Сохранить"
             ],

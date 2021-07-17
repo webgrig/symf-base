@@ -9,6 +9,7 @@ use App\Form\UserCreateType;
 use App\Repository\UserRepositoryInterface;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
+use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\Form\Form;
 use Symfony\Component\Form\FormFactoryInterface;
@@ -65,11 +66,21 @@ class UserService
     public function createForm(Request $request, User $user, array $additionalFields): object
     {
         $form = $this->formFactory->create(UserCreateType::class, $user);
-
+        if (isset($additionalFields['roles'])) {
+            $allRoles = $this->entityManager->getRepository(User::class)->getAllRoles()[0]->getRoles();
+            $form->add('selectUser', ChoiceType::class, [
+                    'label' => 'Роли',
+                    'choices' => $allRoles,
+                    'mapped' => false,
+                    'expanded' => false,
+                    'multiple' => true
+                ]
+            );
+        }
         if (isset($additionalFields['agreeTerms'])) {
 
             $form->add('agreeTerms', CheckboxType::class, [
-                'label' => isset($additionalFields['agreeTerms']['label'])? $additionalFields['agreeTerms']['label'] :'Terms',
+                'label' => isset($additionalFields['agreeTerms']['label']) ? $additionalFields['agreeTerms']['label'] : 'Terms',
                 'mapped' => false,
                 'required' => false,
                 'constraints' => [
@@ -78,23 +89,23 @@ class UserService
                     ]),
                 ],
                 'attr' => [
-                    'class' => isset($additionalFields['agreeTerms']['class'])? $additionalFields['agreeTerms']['class'] :''
+                    'class' => isset($additionalFields['agreeTerms']['class']) ? $additionalFields['agreeTerms']['class'] : ''
                 ]
             ]);
         }
         if (isset($additionalFields['save'])) {
             $form->add('save', SubmitType::class, [
-                'label' => isset($additionalFields['save']['label'])? $additionalFields['save']['label'] :'Создать',
+                'label' => isset($additionalFields['save']['label']) ? $additionalFields['save']['label'] : 'Создать',
                 'attr' => [
-                    'class' => isset($additionalFields['save']['class'])? $additionalFields['save']['class'] :'btn btn-primary mt-3 mb-3 float-left'
+                    'class' => isset($additionalFields['save']['class']) ? $additionalFields['save']['class'] : 'btn btn-primary mt-3 mb-3 float-left'
                 ]
             ]);
         }
         if (isset($additionalFields['delete'])) {
             $form->add('delete', SubmitType::class, [
-                'label' => isset($additionalFields['delete']['label'])? $additionalFields['delete']['label'] :'Удалить',
+                'label' => isset($additionalFields['delete']['label']) ? $additionalFields['delete']['label'] : 'Удалить',
                 'attr' => [
-                    'class' => isset($additionalFields['delete']['class'])? $additionalFields['delete']['class'] :'btn btn-danger ml-3 mt-3 mb-3'
+                    'class' => isset($additionalFields['delete']['class']) ? $additionalFields['delete']['class'] : 'btn btn-danger ml-3 mt-3 mb-3'
                 ]
             ]);
         }
@@ -117,7 +128,7 @@ class UserService
             $user->setIsVerified($isVerified);
         }
 
-        if (null !== $roles){
+        if (null !== $roles) {
             $user->setRoles($roles);
         }
     }
@@ -143,14 +154,11 @@ class UserService
         $user = $this->entityManager->getRepository(User::class)->getOne($id);
         if (!in_array('ROLE_SUPER', $user->getRoles())) {
             $session->getFlashBag()->add('error', 'У вас нет прав на удаление пользователей');
-        }
-        elseif ($user->getId() == $id) {
+        } elseif ($user->getId() == $id) {
             $session->getFlashBag()->add('error', 'Вы не можете удалить сами себя');
-        }
-        elseif (in_array('ROLE_SUPER', $user->getRoles())) {
+        } elseif (in_array('ROLE_SUPER', $user->getRoles())) {
             $session->getFlashBag()->add('error', 'Невозможно удалить Супер-Админа');
-        }
-        else{
+        } else {
             $this->entityManager->remove($user);
             $this->entityManager->flush();
             $session->getFlashBag()->add('error', 'Пользователь удален');
