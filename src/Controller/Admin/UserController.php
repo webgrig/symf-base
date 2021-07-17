@@ -5,14 +5,12 @@ namespace App\Controller\Admin;
 
 
 use App\Entity\User;
-use App\Form\UserRegisterType;
 use App\Repository\UserRepositoryInterface;
 use App\Service\User\UserService;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
-use Symfony\Component\Security\Core\Encoder\UserPasswordEncoderInterface;
 
 class UserController extends BaseController
 {
@@ -46,17 +44,21 @@ class UserController extends BaseController
     /**
      * @Route("/admin/user/create", name="admin_user_create")
      * @param Request $request
+     * @param array $options
      * @return RedirectResponse|Response
      */
 
-    public function createAction(Request $request){
+    public function createAction(Request $request, array $options = []){
         $user = new User();
-        $form = $this->createForm(UserRegisterType::class, $user);
-        $form->handleRequest($request);
-
+        $form = $this->userService->createForm($request, $user, [
+            'save' => [
+                "label" => "Создать"
+            ]
+        ]);
         if ($form->isSubmitted() && $form->isValid())
         {
-            $this->userService->handleCreate($user, 'ROLE_USER', true);
+            $this->userService->prepareEntity($user, $form, true);
+            $this->userService->save($user);
             $this->addFlash('success', 'Пользователь создан');
             return $this->redirectToRoute('admin_user');
 
@@ -77,18 +79,41 @@ class UserController extends BaseController
     public function updateAction(Request $request, int $id)
     {
         $user = $this->userRepository->getOne($id);
-        $formUser = $this->createForm(UserRegisterType::class, $user);
-        $formUser->handleRequest($request);
+        $form = $this->userService->createForm($request, $user, [
+            'save' => [
+                "label" => "Сохранить"
+            ],
+            'delete' => true
+        ]);
 
-        if ($formUser->isSubmitted() && $formUser->isValid()){
-            $this->userService->handleUpdate($user);
-            $this->addFlash('success', 'Изменения сохранены');
+        if ($form->isSubmitted() && $form->isValid()){
+
+            if ($form->get('save')->isClicked())
+            {
+                $this->userService->prepareEntity($user, $form);
+                $this->addFlash('success', 'Изменения сохранены');
+            }
+            if ($form->get('delete')->isClicked())
+            {
+                return $this->delete($request, $user->getId());
+            }
             return $this->redirectToRoute('admin_user');
         }
 
         $forRender = parent::renderDefault();
         $forRender['title'] = 'Редактирование пользователя';
-        $forRender['form'] = $formUser->createView();
+        $forRender['form'] = $form->createView();
         return $this->render('admin/user/form.html.twig', $forRender);
+    }
+
+    /**
+     * @Route("/admin/user/delete/{id}", name="admin_user_delete")
+     * @param Request $request
+     * @param int $id
+     * @return Response
+     */
+    public function delete(Request $request, int $id): Response
+    {
+        return $this->userService->delete($request, $id);
     }
 }

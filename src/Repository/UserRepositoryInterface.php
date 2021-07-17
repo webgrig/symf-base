@@ -8,11 +8,6 @@ use App\Entity\User;
 
 interface UserRepositoryInterface
 {
-    /**
-     * @param User $user
-     * @return mixed
-     */
-    public function setCreate(User $user);
 
     /**
      * @param User $user

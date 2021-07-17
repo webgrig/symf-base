@@ -20,7 +20,10 @@ class UserRepository extends ServiceEntityRepository implements PasswordUpgrader
 {
     private $entityManager;
 
-    public function __construct(ManagerRegistry $registry, EntityManagerInterface $entityManager)
+    public function __construct(
+        ManagerRegistry $registry,
+        EntityManagerInterface $entityManager
+    )
     {
         parent::__construct($registry, User::class);
         $this->entityManager = $entityManager;
@@ -42,7 +45,7 @@ class UserRepository extends ServiceEntityRepository implements PasswordUpgrader
 
     /**
      * @param int $userId
-     * @return object
+     * @return User
      */
     public function getOne(int $userId): object
     {
@@ -55,17 +58,6 @@ class UserRepository extends ServiceEntityRepository implements PasswordUpgrader
     public function getAll(): array
     {
         return parent::findAll();
-    }
-
-    /**
-     * @param User $user
-     * @return mixed
-     */
-    public function setCreate(User $user)
-    {
-        $this->entityManager->persist($user);
-        $this->entityManager->flush();
-
     }
 
     /**

@@ -2,8 +2,9 @@
 
 namespace App\Controller\Security;
 
+use App\Controller\Admin\UserController;
 use App\Entity\User;
-use App\Form\UserRegisterType;
+use App\Form\UserCreateType;
 use App\Repository\UserRepository;
 use App\Repository\UserRepositoryInterface;
 use App\Security\EmailVerifier;
@@ -59,32 +60,22 @@ class RegistrationController extends AbstractController
             return $this->redirectToRoute('admin_home');
         }
         $user = new User();
-        $form = $this->createForm(UserRegisterType::class, $user)
-            ->add('agreeTerms', CheckboxType::class, [
-                'mapped' => false,
-                'constraints' => [
-                    new IsTrue([
-                        'message' => 'You should agree to our terms.',
-                    ]),
-                ],
-            ])
-
-            ->add('save', SubmitType::class, [
+        $form = $this->userService->createForm($request, $user, [
+            'agreeTerms' => true,
+            'save' => [
                 'label' => 'Зарегистрироваться',
-                'attr' => [
-                    'class' => 'btn btn-block btn-primary mt-3'
-                ]
-            ]);
-        $form->handleRequest($request);
+                'class' => 'btn btn-block btn-primary mt-3'
+            ]
+        ]);
 
         if ($form->isSubmitted() && $form->isValid()) {
 
-            $this->userService->handleCreate($user, 'ROLE_USER');
+            $this->userService->prepareEntity($user, $form, false, ['ROLE_USER']);
+            $this->userService->save($user);
             return $this->redirectToRoute('send-confirmation', [
                 'id' => $user->getId()
             ]);
         }
-
         return $this->render('registration/register.html.twig', [
             'form' => $form->createView(),
         ]);
