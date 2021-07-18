@@ -5,7 +5,7 @@ namespace App\Service\User;
 
 
 use App\Entity\User;
-use App\Form\UserCreateType;
+use App\Form\UserType;
 use App\Repository\UserRepositoryInterface;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
@@ -65,7 +65,7 @@ class UserService
 
     public function createForm(Request $request, User $user, array $additionalFields): object
     {
-        $form = $this->formFactory->create(UserCreateType::class, $user);
+        $form = $this->formFactory->create(UserType::class, $user);
         if (isset($additionalFields['roles'])) {
             $allRoles = $this->entityManager->getRepository(User::class)->findAllRoles()[0]->getRoles();
             $form->add('selectUser', ChoiceType::class, [
