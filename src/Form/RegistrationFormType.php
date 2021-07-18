@@ -5,8 +5,10 @@ namespace App\Form;
 use App\Entity\User;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
+use Symfony\Component\Form\Extension\Core\Type\EmailType;
 use Symfony\Component\Form\Extension\Core\Type\PasswordType;
 use Symfony\Component\Form\Extension\Core\Type\RepeatedType;
+use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
@@ -19,20 +21,17 @@ class RegistrationFormType extends AbstractType
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
         $builder
-            ->add('email')
-            ->add('fullName', TextType::class, [
+
+            ->add('email', EmailType::class, [
+                'required' => false,
+                'label' => 'Email',
+            ])
+            ->add('full_name', TextType::class, [
+                'required' => false,
                 'label' => 'Имя',
                 'attr' => [
                     'placeholder' => 'Введите Имя'
                 ]
-            ])
-            ->add('agreeTerms', CheckboxType::class, [
-                'mapped' => false,
-                'constraints' => [
-                    new IsTrue([
-                        'message' => 'You should agree to our terms.',
-                    ]),
-                ],
             ])
             ->add('plainPassword', RepeatedType::class, [
                 'type' => PasswordType::class,
@@ -40,7 +39,6 @@ class RegistrationFormType extends AbstractType
                 'mapped' => false,
                 'first_options' => [
                     'label' => 'Пароль',
-                    'mapped' => false,
                     'attr' => ['autocomplete' => 'new-password'],
                     'constraints' => [
                         new NotBlank([
@@ -69,6 +67,42 @@ class RegistrationFormType extends AbstractType
                             'max' => 4096,
                         ]),
                     ],
+                ]
+            ])
+            ->add('agreeTerms', CheckboxType::class, [
+                'required' => false,
+                'mapped' => false,
+                'attr' => [
+                    'class' => ''
+                ],
+                'constraints' => [
+                    new IsTrue([
+                        'message' => 'You should agree to our terms.',
+                    ]),
+                ],
+            ])
+            ->add('agreeLink', SubmitType::class, [
+                'label' => 'Соглашение',
+                'attr' => [
+                    'class' => ' d-inline agree-link'
+                ]
+            ])
+            ->add('save', SubmitType::class, [
+                'label' => 'Зарегистрироваться',
+                'attr' => [
+                    'class' => 'btn btn-block btn-primary mt-3'
+                ]
+            ])
+            ->add('agreeTermAgree', SubmitType::class, [
+                'label' => 'Согласен',
+                'attr' => [
+                    'class' => 'btn btn-primary mt-3'
+                ]
+            ])
+            ->add('agreeTermRefuse', SubmitType::class, [
+                'label' => 'Отказываюсь',
+                'attr' => [
+                    'class' => 'btn btn-danger mt-3 ml-3 float-right'
                 ]
             ])
         ;

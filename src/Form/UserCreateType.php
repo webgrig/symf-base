@@ -30,14 +30,14 @@ class UserCreateType extends AbstractType
             ->add('plainPassword', RepeatedType::class, [
                 'type' => PasswordType::class,
                 'required' => false,
-//                'mapped' => false,
+                'mapped' => false,
                 'first_options' => [
                     'label' => 'Пароль',
 //                    'attr' => ['autocomplete' => 'new-password'],
                 ],
                 'second_options' => [
                     'label' => 'Подтвердить пароль',
-//                    'mapped' => false,
+                    'mapped' => false,
 //                    'attr' => ['autocomplete' => 'new-password'],
                 ]
             ])

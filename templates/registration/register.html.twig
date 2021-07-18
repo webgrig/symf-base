@@ -10,14 +10,33 @@
                 {% for flashError in app.flashes('verify_email_error') %}
                     <div class="alert alert-danger" role="alert">{{ flashError }}</div>
                 {% endfor %}
-                <div class="form-login shadow-lg p-4">
-                    <h1 class="h3 mb-3 font-weight-normal text-center">Please sign up</h1>
-                    {{ form(form) }}
-                    <div class="text-right mt-3">
-                        <a href="{{ path('app_login') }}" class="mr-3">Вход</a>
-                        <a href="{{ path('app_forgot_password_request') }}">Напомнить пароль</a>
+                {{ form_start(form) }}
+                <div class="form-agree-term-{{ agreeTerm }}">
+                    <div class="form-login shadow-lg p-4">
+                        <h1 class="h3 mb-3 font-weight-normal text-center">Please sign up</h1>
+                        {{ form_start(form) }}
+                        {{ form_row(form.email) }}
+                        {{ form_row(form.full_name) }}
+                        {{ form_row(form.plainPassword) }}
+                        {% if(agreeTermAgree) %}
+                            {% form_theme form 'registration/_partials/fields.html.twig' %}
+                            {{ form_widget(form.agreeTerms, {'attr': {'checked': true}}) }}
+                        {% else %}
+                            {% form_theme form 'registration/_partials/fields.html.twig' %}
+                            {{ form_row(form.agreeTerms) }}
+                        {% endif %}
+                        {{ form_row(form.agreeLink) }}
+                        {{ form_row(form.save) }}
+                        <div class="text-right mt-3">
+                            <a href="{{ path('app_login') }}" class="mr-3">Вход</a>
+                            <a href="{{ path('app_forgot_password_request') }}">Напомнить пароль</a>
+                        </div>
                     </div>
                 </div>
+                <div class="agree-term-{{ agreeTerm }}">
+                    {% include 'registration/_partials/agree-term.html.twig' %}
+                </div>
+                {{ form_end(form) }}
             </div>
         </div>
     </div>

@@ -2,57 +2,31 @@
 
 namespace App\Controller\Security;
 
-use App\Controller\Admin\UserController;
 use App\Entity\User;
-use App\Form\UserCreateType;
+use App\Form\RegistrationFormType;
 use App\Repository\UserRepository;
-use App\Repository\UserRepositoryInterface;
 use App\Security\EmailVerifier;
-use App\Service\User\UserService;
 use Symfony\Bridge\Twig\Mime\TemplatedEmail;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
-use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Mime\Address;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Security\Core\Encoder\UserPasswordEncoderInterface;
-use Symfony\Component\Validator\Constraints\IsTrue;
 use SymfonyCasts\Bundle\VerifyEmail\Exception\VerifyEmailExceptionInterface;
+use function Symfony\Component\String\u;
 
 class RegistrationController extends AbstractController
 {
     private $emailVerifier;
 
-    /**
-     * @var UserRepositoryInterface
-     */
-    private $userRepository;
-
-    /**
-     * @var UserService
-     */
-    private $userService;
-
-    /**
-     * RegistrationController constructor.
-     * @param EmailVerifier $emailVerifier
-     * @param UserRepositoryInterface $userRepository
-     * @param UserService $userService
-     */
-    public function __construct(EmailVerifier $emailVerifier, UserRepositoryInterface $userRepository, UserService $userService)
+    public function __construct(EmailVerifier $emailVerifier)
     {
         $this->emailVerifier = $emailVerifier;
-        $this->userRepository =  $userRepository;
-        $this->userService = $userService;
     }
 
     /**
      * @Route("/register", name="app_register")
-     * @param Request $request
-     * @param UserPasswordEncoderInterface $passwordEncoder
-     * @return Response
      */
     public function register(Request $request, UserPasswordEncoderInterface $passwordEncoder): Response
     {
@@ -60,23 +34,44 @@ class RegistrationController extends AbstractController
             return $this->redirectToRoute('admin_home');
         }
         $user = new User();
-        $form = $this->userService->createForm($request, $user, [
-            'agreeTerms' => true,
-            'save' => [
-                'label' => 'Зарегистрироваться',
-                'class' => 'btn btn-block btn-primary mt-3'
-            ]
-        ]);
+        $form = $this->createForm(RegistrationFormType::class, $user);
+        $form->handleRequest($request);
+        $agreeTerm = "hide";
+        $agreeTermAgree = false;
+        if ($form->get('agreeTermRefuse')->isClicked()) {
+            return $this->redirectToRoute('home');
+        }
+        if ($form->get('agreeTermAgree')->isClicked()) {
+            $agreeTermAgree = true;
+        }
+        if ($form->get('agreeLink')->isClicked())
+        {
+            $agreeTerm = "show";
+        }
+
 
         if ($form->isSubmitted() && $form->isValid()) {
+            // encode the plain password
+            $user->setPassword(
+                $passwordEncoder->encodePassword(
+                    $user,
+                    $form->get('plainPassword')->getData()
+                )
+            );
+            $user->setRoles();
 
-            $this->userService->prepareEntity($user, $form, false, ['ROLE_USER']);
-            $this->userService->save($user);
+            $entityManager = $this->getDoctrine()->getManager();
+            $entityManager->persist($user);
+            $entityManager->flush();
+            // do anything else you need here, like send an email
             return $this->redirectToRoute('send-confirmation', [
                 'id' => $user->getId()
             ]);
         }
+
         return $this->render('registration/register.html.twig', [
+            'agreeTerm' => $agreeTerm,
+            'agreeTermAgree' => $agreeTermAgree,
             'form' => $form->createView(),
         ]);
     }
@@ -121,9 +116,6 @@ class RegistrationController extends AbstractController
 
     /**
      * @Route("/verify/email", name="app_verify_email")
-     * @param Request $request
-     * @param UserRepository $userRepository
-     * @return Response
      */
     public function verifyUserEmail(Request $request, UserRepository $userRepository): Response
     {

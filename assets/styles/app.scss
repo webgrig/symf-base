@@ -1,2 +1,29 @@
 @import '~bootstrap/scss/bootstrap';
 @import '~bootstrap-icons/font/bootstrap-icons.css';
+.agree-link{
+  background: none;
+  border: 0;
+  padding: 0;
+  color: #007bff;
+  margin-bottom: 0.25rem;
+  margin-left: 1rem;
+}
+
+.form-agree-term-hide{
+  visibility: visible;
+}
+.form-agree-term-show{
+  visibility: hidden;
+  position: absolute;
+}
+.agree-term-hide{
+  visibility: hidden;
+  position: absolute;
+}
+.agree-term-show{
+  visibility: visible;
+}
+
+.form-login .form-check{
+  float: left;
+}
