@@ -47,7 +47,7 @@ class UserRepository extends ServiceEntityRepository implements PasswordUpgrader
      * @param int $userId
      * @return User
      */
-    public function getOne(int $userId): object
+    public function findOne(int $userId): object
     {
         return parent::find($userId);
     }
@@ -70,7 +70,7 @@ class UserRepository extends ServiceEntityRepository implements PasswordUpgrader
     }
 
 
-    public function getAllRoles(): array
+    public function findAllRoles(): array
     {
         return $this->createQueryBuilder('u')
             ->where('u.roles LIKE :val')

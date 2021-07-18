@@ -67,7 +67,7 @@ class UserService
     {
         $form = $this->formFactory->create(UserCreateType::class, $user);
         if (isset($additionalFields['roles'])) {
-            $allRoles = $this->entityManager->getRepository(User::class)->getAllRoles()[0]->getRoles();
+            $allRoles = $this->entityManager->getRepository(User::class)->findAllRoles()[0]->getRoles();
             $form->add('selectUser', ChoiceType::class, [
                     'label' => 'Роли',
                     'choices' => $allRoles,
@@ -151,7 +151,7 @@ class UserService
     public function delete(Request $request, int $id): Response
     {
         $session = $request->getSession();
-        $user = $this->entityManager->getRepository(User::class)->getOne($id);
+        $user = $this->entityManager->getRepository(User::class)->findOne($id);
         if (!in_array('ROLE_SUPER', $user->getRoles())) {
             $session->getFlashBag()->add('error', 'У вас нет прав на удаление пользователей');
         } elseif ($user->getId() == $id) {

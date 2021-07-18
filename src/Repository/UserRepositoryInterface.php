@@ -19,7 +19,7 @@ interface UserRepositoryInterface
      * @param int $userId
      * @return User
      */
-    public function getOne(int $userId): object;
+    public function findOne(int $userId): object;
 
     /**
      * @return User[]

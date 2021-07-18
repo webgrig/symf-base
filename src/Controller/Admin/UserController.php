@@ -79,7 +79,7 @@ class UserController extends BaseController
      */
     public function updateAction(Request $request, int $id)
     {
-        $user = $this->userRepository->getOne($id);
+        $user = $this->userRepository->findOne($id);
         $form = $this->userService->createForm($request, $user, [
             'roles' => true,
             'save' => [
