@@ -3,6 +3,7 @@
 namespace App\Form;
 
 use App\Entity\User;
+use App\Form\EventListener\Registration\RegistrationSubscriber;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
 use Symfony\Component\Form\Extension\Core\Type\EmailType;
@@ -28,9 +29,9 @@ class RegistrationFormType extends AbstractType
             ])
             ->add('full_name', TextType::class, [
                 'required' => false,
-                'label' => 'Имя',
+                'label' => 'ФИО',
                 'attr' => [
-                    'placeholder' => 'Введите Имя'
+                    'placeholder' => 'Введите ФИО'
                 ]
             ])
             ->add('plainPassword', RepeatedType::class, [
@@ -54,7 +55,6 @@ class RegistrationFormType extends AbstractType
                 ],
                 'second_options' => [
                     'label' => 'Подтвердить пароль',
-                    'mapped' => false,
                     'attr' => ['autocomplete' => 'new-password'],
                     'constraints' => [
                         new NotBlank([
@@ -69,11 +69,12 @@ class RegistrationFormType extends AbstractType
                     ],
                 ]
             ])
-            ->add('agreeTerms', CheckboxType::class, [
+            ->add('agreeTermsCheckBox', CheckboxType::class, [
+                'label' => 'Agree Terms',
                 'required' => false,
                 'mapped' => false,
-                'attr' => [
-                    'class' => ''
+                'row_attr' => [
+                    'class' => 'float-left'
                 ],
                 'constraints' => [
                     new IsTrue([
@@ -81,10 +82,10 @@ class RegistrationFormType extends AbstractType
                     ]),
                 ],
             ])
-            ->add('agreeLink', SubmitType::class, [
+            ->add('agreeLinkButton', SubmitType::class, [
                 'label' => 'Соглашение',
                 'attr' => [
-                    'class' => ' d-inline agree-link'
+                    'class' => 'btn-inline agree-link'
                 ]
             ])
             ->add('save', SubmitType::class, [
@@ -93,25 +94,26 @@ class RegistrationFormType extends AbstractType
                     'class' => 'btn btn-block btn-primary mt-3'
                 ]
             ])
-            ->add('agreeTermAgree', SubmitType::class, [
+            ->add('agreeTermsAgreeButton', SubmitType::class, [
                 'label' => 'Согласен',
                 'attr' => [
                     'class' => 'btn btn-primary mt-3'
                 ]
             ])
-            ->add('agreeTermRefuse', SubmitType::class, [
+            ->add('agreeTermsRefuseButton', SubmitType::class, [
                 'label' => 'Отказываюсь',
                 'attr' => [
                     'class' => 'btn btn-danger mt-3 ml-3 float-right'
                 ]
             ])
         ;
+//        $builder->addEventSubscriber(new RegistrationSubscriber());
     }
 
     public function configureOptions(OptionsResolver $resolver)
     {
         $resolver->setDefaults([
-            'data_class' => User::class,
+            'data_class' => User::class
         ]);
     }
 }

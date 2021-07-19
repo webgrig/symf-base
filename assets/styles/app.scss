@@ -9,21 +9,13 @@
   margin-left: 1rem;
 }
 
-.form-agree-term-hide{
-  visibility: visible;
-}
-.form-agree-term-show{
-  visibility: hidden;
-  position: absolute;
-}
-.agree-term-hide{
-  visibility: hidden;
-  position: absolute;
-}
-.agree-term-show{
-  visibility: visible;
-}
-
 .form-login .form-check{
   float: left;
+  margin-bottom: 1rem;
+}
+
+.hide-row{
+  visibility: hidden;
+  position: absolute;
+  top: -1px;
 }

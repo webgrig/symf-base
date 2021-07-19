@@ -4,18 +4,15 @@
 namespace App\Service\User;
 
 
+use App\Entity\Role;
 use App\Entity\User;
 use App\Form\UserType;
 use App\Repository\UserRepositoryInterface;
 use Doctrine\ORM\EntityManagerInterface;
-use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
-use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
-use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\Form\Form;
 use Symfony\Component\Form\FormFactoryInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Security\Core\Encoder\UserPasswordEncoderInterface;
-use Symfony\Component\Validator\Constraints\IsTrue;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\Routing\RouterInterface;
 use Symfony\Component\HttpFoundation\Response;
@@ -59,56 +56,12 @@ class UserService
     /**
      * @param Request $request
      * @param User $user
-     * @param array $additionalFields
      * @return Form
      */
 
-    public function createForm(Request $request, User $user, array $additionalFields): object
+    public function createForm(Request $request, User $user): object
     {
         $form = $this->formFactory->create(UserType::class, $user);
-        if (isset($additionalFields['roles'])) {
-            $allRoles = $this->entityManager->getRepository(User::class)->findAllRoles()[0]->getRoles();
-            $form->add('selectUser', ChoiceType::class, [
-                    'label' => 'Роли',
-                    'choices' => $allRoles,
-                    'mapped' => false,
-                    'expanded' => false,
-                    'multiple' => true
-                ]
-            );
-        }
-        if (isset($additionalFields['agreeTerms'])) {
-
-            $form->add('agreeTerms', CheckboxType::class, [
-                'label' => isset($additionalFields['agreeTerms']['label']) ? $additionalFields['agreeTerms']['label'] : 'Terms',
-                'mapped' => false,
-                'required' => false,
-                'constraints' => [
-                    new IsTrue([
-                        'message' => 'You should agree to our terms.',
-                    ]),
-                ],
-                'attr' => [
-                    'class' => isset($additionalFields['agreeTerms']['class']) ? $additionalFields['agreeTerms']['class'] : ''
-                ]
-            ]);
-        }
-        if (isset($additionalFields['save'])) {
-            $form->add('save', SubmitType::class, [
-                'label' => isset($additionalFields['save']['label']) ? $additionalFields['save']['label'] : 'Создать',
-                'attr' => [
-                    'class' => isset($additionalFields['save']['class']) ? $additionalFields['save']['class'] : 'btn btn-primary mt-3 mb-3 float-left'
-                ]
-            ]);
-        }
-        if (isset($additionalFields['delete'])) {
-            $form->add('delete', SubmitType::class, [
-                'label' => isset($additionalFields['delete']['label']) ? $additionalFields['delete']['label'] : 'Удалить',
-                'attr' => [
-                    'class' => isset($additionalFields['delete']['class']) ? $additionalFields['delete']['class'] : 'btn btn-danger ml-3 mt-3 mb-3'
-                ]
-            ]);
-        }
         $form->handleRequest($request);
         return $form;
     }
@@ -121,8 +74,10 @@ class UserService
      */
     public function prepareEntity(User $user, Form $form, bool $isVerified = false, array $roles = NULL): void
     {
-        $password = $this->passwordEncoder->encodePassword($user, $form->get('plainPassword')->getData());
-        $user->setPassword($password);
+        if ($form->get('plainPassword')->getData()) {
+            $password = $this->passwordEncoder->encodePassword($user, $form->get('plainPassword')->getData());
+            $user->setPassword($password);
+        }
 
         if (null !== $isVerified) {
             $user->setIsVerified($isVerified);

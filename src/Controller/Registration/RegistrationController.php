@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Controller\Security;
+namespace App\Controller\Registration;
 
 use App\Entity\User;
 use App\Form\RegistrationFormType;
@@ -14,7 +14,6 @@ use Symfony\Component\Mime\Address;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Security\Core\Encoder\UserPasswordEncoderInterface;
 use SymfonyCasts\Bundle\VerifyEmail\Exception\VerifyEmailExceptionInterface;
-use function Symfony\Component\String\u;
 
 class RegistrationController extends AbstractController
 {
@@ -36,19 +35,12 @@ class RegistrationController extends AbstractController
         $user = new User();
         $form = $this->createForm(RegistrationFormType::class, $user);
         $form->handleRequest($request);
-        $agreeTerm = "hide";
-        $agreeTermAgree = false;
-        if ($form->get('agreeTermRefuse')->isClicked()) {
+        if ($form->get('agreeTermsRefuseButton')->isClicked()) {
             return $this->redirectToRoute('home');
         }
-        if ($form->get('agreeTermAgree')->isClicked()) {
-            $agreeTermAgree = true;
-        }
-        if ($form->get('agreeLink')->isClicked())
-        {
-            $agreeTerm = "show";
-        }
-
+        $agreeTermsAgree = $form->get('agreeTermsAgreeButton')->isClicked()?'hide-row':false;
+        $hideFormBodyCssClass = $form->get('agreeLinkButton')->isClicked()?'hide-row':"";
+        $hideTermsBodyCssClass = !$form->get('agreeLinkButton')->isClicked()?'hide-row':"";
 
         if ($form->isSubmitted() && $form->isValid()) {
             // encode the plain password
@@ -69,9 +61,10 @@ class RegistrationController extends AbstractController
             ]);
         }
 
-        return $this->render('registration/register.html.twig', [
-            'agreeTerm' => $agreeTerm,
-            'agreeTermAgree' => $agreeTermAgree,
+        return $this->render('registration/index.html.twig', [
+            'agreeTermsAgree' => $agreeTermsAgree,
+            'hideFormBodyCssClass' => $hideFormBodyCssClass,
+            'hideTermsBodyCssClass' => $hideTermsBodyCssClass,
             'form' => $form->createView(),
         ]);
     }

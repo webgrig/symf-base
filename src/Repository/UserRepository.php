@@ -2,10 +2,12 @@
 
 namespace App\Repository;
 
+use App\Entity\Role;
 use App\Entity\User;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\Persistence\ManagerRegistry;
+use PhpParser\Node\Expr\Cast\Object_;
 use Symfony\Component\Security\Core\Exception\UnsupportedUserException;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\Security\Core\User\PasswordUpgraderInterface;
@@ -70,14 +72,36 @@ class UserRepository extends ServiceEntityRepository implements PasswordUpgrader
     }
 
 
-    public function findAllRoles(): array
+    public function findUserRoles($id): array{
+        $roles = $this->createQueryBuilder('u')
+            ->select('u.roles')
+            -join(Role::class, '')
+            ->where('u.id  :val')
+            ->setParameter('val', $id)
+            ->getQuery()
+            ->getResult()
+            ;
+    }
+    public function findAllRoles()
     {
-        return $this->createQueryBuilder('u')
+        $roles = $this->createQueryBuilder('u')
             ->where('u.roles LIKE :val')
             ->setParameter('val', "%ROLE_SUPER%")
             ->setMaxResults(1)
             ->getQuery()
-            ->getResult()
+            ->getResult()[0]
+            ->getRoles()
             ;
+        $rolesCollection = [];
+        foreach ($roles as $role)
+        {
+            $node = new Role();
+            $node->setId(1);
+            $node->setTitle($role);
+            $node->setValue($role);
+
+            $rolesCollection[] = $node;
+        }
+        return $rolesCollection;
     }
 }

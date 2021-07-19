@@ -2,7 +2,10 @@
 
 namespace App\Entity;
 
+
 use App\Repository\UserRepository;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
@@ -29,7 +32,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     private $email;
 
     /**
-     * @ORM\Column(type="json")
+     * @ORM\Column(type="json", nullable=false)
      */
     private $roles = [];
 
@@ -42,15 +45,25 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     private $plainPassword;
 
     /**
-     * @ORM\Column(type="string", length=255, nullable=true)
-     * @Assert\NotBlank
-     */
-    private $fullName;
-
-    /**
      * @ORM\Column(type="boolean")
      */
     private $isVerified = false;
+
+    /**
+     * @ORM\ManyToMany(targetEntity=Role::class, inversedBy="users")
+     */
+    private $roles_collection;
+
+    /**
+     * @ORM\Column(type="string", length=255)
+     * @Assert\NotBlank
+     */
+    private $full_name;
+
+    public function __construct()
+    {
+        $this->roles_collection = new ArrayCollection();
+    }
 
 
     public function getPlainPassword()
@@ -103,16 +116,12 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
      */
     public function getRoles(): array
     {
-        $roles = $this->roles;
-        // guarantee every user at least has ROLE_USER
-        $roles[] = 'ROLE_USER';
-
-        return array_unique($roles);
+        return $this->roles;
     }
 
     public function setRoles(array $roles = [])
     {
-        $roles[] = 'ROLE_USER';
+        $roles[] = 'ROLE_GUEST';
         $this->roles = array_unique($roles);
 
         return $this->roles;
@@ -163,12 +172,12 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 
     public function getFullName(): ?string
     {
-        return $this->fullName;
+        return $this->full_name;
     }
 
-    public function setFullName(?string $fullName): self
+    public function setFullName(?string $full_name): self
     {
-        $this->fullName = $fullName;
+        $this->full_name = $full_name;
 
         return $this;
     }
@@ -181,6 +190,36 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function setIsVerified(bool $isVerified): self
     {
         $this->isVerified = $isVerified;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection|Role[]
+     */
+    public function getRolesCollection(): Collection
+    {
+        return $this->roles_collection;
+    }
+
+    public function addRolesCollection(Role $rolesCollection): self
+    {
+        if (!$this->roles_collection->contains($rolesCollection)) {
+            $this->roles_collection[] = $rolesCollection;
+
+        }
+        $roleGuestEntity = $this->userRepository->findOneBy(['title' => 'ROLE_GUEST']);
+        if (!$this->roles_collection->contains($roleGuestEntity)) {
+            $this->roles_collection[] = $roleGuestEntity;
+
+        }
+
+        return $this;
+    }
+
+    public function removeRolesCollection(Role $rolesCollection): self
+    {
+        $this->roles_collection->removeElement($rolesCollection);
 
         return $this;
     }

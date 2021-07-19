@@ -49,13 +49,8 @@ class UserController extends BaseController
      */
 
     public function createAction(Request $request, array $options = []){
-        $user = new User();
-        $form = $this->userService->createForm($request, $user, [
-            'save' => [
-                "label" => "Создать"
-            ],
-            'roles' => true
-        ]);
+        $user = new User($this->userRepository);
+        $form = $this->userService->createForm($request, $user);
         if ($form->isSubmitted() && $form->isValid())
         {
             $this->userService->prepareEntity($user, $form, true);
@@ -80,19 +75,14 @@ class UserController extends BaseController
     public function updateAction(Request $request, int $id)
     {
         $user = $this->userRepository->findOne($id);
-        $form = $this->userService->createForm($request, $user, [
-            'roles' => true,
-            'save' => [
-                "label" => "Сохранить"
-            ],
-            'delete' => true
-        ]);
+        $form = $this->userService->createForm($request, $user);
 
         if ($form->isSubmitted() && $form->isValid()){
 
             if ($form->get('save')->isClicked())
             {
                 $this->userService->prepareEntity($user, $form);
+                $this->userService->save($user);
                 $this->addFlash('success', 'Изменения сохранены');
             }
             if ($form->get('delete')->isClicked())
@@ -105,6 +95,7 @@ class UserController extends BaseController
         $forRender = parent::renderDefault();
         $forRender['title'] = 'Редактирование пользователя';
         $forRender['form'] = $form->createView();
+        $forRender['deleteButton'] = true;
         return $this->render('admin/user/form.html.twig', $forRender);
     }
 
