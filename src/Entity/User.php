@@ -65,6 +65,8 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
      */
     private $img;
 
+    private $storageDirName = 'user';
+
     public function __construct()
     {
         $this->roles_collection = new ArrayCollection();
@@ -237,5 +239,10 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         $this->img = $img;
 
         return $this;
+    }
+
+    public function getStorageDirName(): ?string
+    {
+        return $this->storageDirName;
     }
 }

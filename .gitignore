@@ -5,6 +5,7 @@
 /.env.*.local
 /config/secrets/prod/prod.decrypt.private.php
 /public/bundles/
+/public/
 /var/
 /vendor/
 ###< symfony/framework-bundle ###
@@ -29,7 +30,6 @@ yarn-error.log
 /.idea
 /composer.lock
 /package-lock.json
-/vendor
 /node_modules
 /.env
 

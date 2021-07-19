@@ -38,7 +38,7 @@ class UserService
 
     private $fm;
 
-    private $user;
+    private $userSession;
 
     /**
      * UserService constructor.
@@ -60,7 +60,7 @@ class UserService
         $this->formFactory = $formFactory;
         $this->router = $router;
         $this->fm = $fileManagerService;
-        $this->user = $tokenStorage->getToken()->getUser();
+        $this->userSession = $tokenStorage->getToken()->getUser();
 
     }
 
@@ -82,11 +82,11 @@ class UserService
      * @param Form $form
      * @param bool $isVerified
      */
-    public function prepareEntity(User $user, Form $form, string $storageDirName, bool $isVerified = false): void
+    public function prepareEntity(User $user, Form $form, bool $isVerified = false): void
     {
         if (null !== $file = $form->get('img')->getData()){
-            $this->deleteImg($user, $storageDirName);
-            $user->setImg($this->fm->imageUpload($file, $storageDirName));
+            $this->deleteImg($user);
+            $user->setImg($this->fm->imageUpload($file, $user->getStorageDirName()));
         }
         if ($form->get('plainPassword')->getData()) {
             $password = $this->passwordEncoder->encodePassword($user, $form->get('plainPassword')->getData());
@@ -127,12 +127,11 @@ class UserService
 
     /**
      * @param User $user
-     * @param string $storageDirName
      */
-    public function deleteImg(User $user, string $storageDirName): void
+    public function deleteImg(User $user): void
     {
         if (null !== $userImg = $user->getImg()){
-            $this->fm->removeImage($userImg, $storageDirName);
+            $this->fm->removeImage($userImg, $user->getStorageDirName());
         }
     }
 
@@ -152,21 +151,20 @@ class UserService
     /**
      * @param Request $request
      * @param int $id
-     * @param string $storageDirName
      * @return Response
      */
-    public function delete(Request $request, int $id, string $storageDirName): Response
+    public function delete(Request $request, int $id): Response
     {
         $session = $request->getSession();
         $user = $this->entityManager->getRepository(User::class)->findOne($id);
-        if (!in_array('ROLE_SUPER', $this->user->getRoles())) {
+        if (!in_array('ROLE_SUPER', $this->userSession->getRoles())) {
             $session->getFlashBag()->add('error', 'У вас нет прав на удаление пользователей');
-        } elseif ($this->user->getId() == $id) {
+        } elseif ($this->userSession->getId() == $id) {
             $session->getFlashBag()->add('error', 'Вы не можете удалить сами себя');
         } elseif (in_array('ROLE_SUPER', $user->getRoles())) {
             $session->getFlashBag()->add('error', 'Невозможно удалить Супер-Админа');
         } else {
-            $this->deleteImg($user, $storageDirName);
+            $this->deleteImg($user);
             $this->entityManager->remove($user);
             $this->entityManager->flush();
             $session->getFlashBag()->add('error', 'Пользователь удален');
