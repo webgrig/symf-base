@@ -82,13 +82,11 @@ class UserService
      * @param Form $form
      * @param bool $isVerified
      */
-    public function prepareEntity(User $user, Form $form, bool $isVerified = false): void
+    public function prepareEntity(User $user, Form $form, string $storageDirName, bool $isVerified = false): void
     {
         if (null !== $file = $form->get('img')->getData()){
-            if (null !== $userImg = $user->getImg()){
-                $this->fm->removeImage($userImg, 'user');
-            }
-            $user->setImg($this->fm->imageUpload($file, 'user'));
+            $this->deleteImg($user, $storageDirName);
+            $user->setImg($this->fm->imageUpload($file, $storageDirName));
         }
         if ($form->get('plainPassword')->getData()) {
             $password = $this->passwordEncoder->encodePassword($user, $form->get('plainPassword')->getData());
@@ -101,41 +99,11 @@ class UserService
         $this->addRolesCollection($user);
     }
 
+
     /**
      * @param User $user
-     * @param UploadedFile $file
-     * @return object
      */
-    public function save(User $user): object
-    {
-        $this->entityManager->persist($user);
-        $this->entityManager->flush();
-        return $user;
-    }
-
-    /**
-     * @param $id
-     * @return Response
-     */
-    public function delete(Request $request, int $id): Response
-    {
-        $session = $request->getSession();
-        $user = $this->entityManager->getRepository(User::class)->findOne($id);
-        if (!in_array('ROLE_SUPER', $this->user->getRoles())) {
-            $session->getFlashBag()->add('error', 'У вас нет прав на удаление пользователей');
-        } elseif ($this->user->getId() == $id) {
-            $session->getFlashBag()->add('error', 'Вы не можете удалить сами себя');
-        } elseif (in_array('ROLE_SUPER', $user->getRoles())) {
-            $session->getFlashBag()->add('error', 'Невозможно удалить Супер-Админа');
-        } else {
-            $this->entityManager->remove($user);
-            $this->entityManager->flush();
-            $session->getFlashBag()->add('error', 'Пользователь удален');
-        }
-        return new RedirectResponse($this->router->generate('admin_user'));
-    }
-
-    public function addRolesCollection(User $user)
+    public function addRolesCollection(User $user): void
     {
         if (null == $user->getId()){
             $user->setRoles();
@@ -155,5 +123,54 @@ class UserService
             $user->setRoles($roles);
         }
 
+    }
+
+    /**
+     * @param User $user
+     * @param string $storageDirName
+     */
+    public function deleteImg(User $user, string $storageDirName): void
+    {
+        if (null !== $userImg = $user->getImg()){
+            $this->fm->removeImage($userImg, $storageDirName);
+        }
+    }
+
+
+    /**
+     * @param User $user
+     * @param UploadedFile $file
+     * @return object
+     */
+    public function save(User $user): object
+    {
+        $this->entityManager->persist($user);
+        $this->entityManager->flush();
+        return $user;
+    }
+
+    /**
+     * @param Request $request
+     * @param int $id
+     * @param string $storageDirName
+     * @return Response
+     */
+    public function delete(Request $request, int $id, string $storageDirName): Response
+    {
+        $session = $request->getSession();
+        $user = $this->entityManager->getRepository(User::class)->findOne($id);
+        if (!in_array('ROLE_SUPER', $this->user->getRoles())) {
+            $session->getFlashBag()->add('error', 'У вас нет прав на удаление пользователей');
+        } elseif ($this->user->getId() == $id) {
+            $session->getFlashBag()->add('error', 'Вы не можете удалить сами себя');
+        } elseif (in_array('ROLE_SUPER', $user->getRoles())) {
+            $session->getFlashBag()->add('error', 'Невозможно удалить Супер-Админа');
+        } else {
+            $this->deleteImg($user, $storageDirName);
+            $this->entityManager->remove($user);
+            $this->entityManager->flush();
+            $session->getFlashBag()->add('error', 'Пользователь удален');
+        }
+        return new RedirectResponse($this->router->generate('admin_user'));
     }
 }

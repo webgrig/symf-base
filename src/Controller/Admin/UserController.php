@@ -53,7 +53,7 @@ class UserController extends BaseController
         $form = $this->userService->createForm($request, $user);
         if ($form->isSubmitted() && $form->isValid())
         {
-            $this->userService->prepareEntity($user, $form, true);
+            $this->userService->prepareEntity($user, $form, 'user', true);
             $this->userService->save($user);
             $this->addFlash('success', 'Пользователь создан');
             return $this->redirectToRoute('admin_user');
@@ -81,7 +81,7 @@ class UserController extends BaseController
 
             if ($form->get('save')->isClicked())
             {
-                $this->userService->prepareEntity($user, $form);
+                $this->userService->prepareEntity($user, $form, 'user');
                 $this->userService->save($user);
                 $this->addFlash('success', 'Изменения сохранены');
             }
@@ -107,6 +107,6 @@ class UserController extends BaseController
      */
     public function delete(Request $request, int $id): Response
     {
-        return $this->userService->delete($request, $id);
+        return $this->userService->delete($request, $id, 'user');
     }
 }
