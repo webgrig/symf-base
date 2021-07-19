@@ -10,13 +10,15 @@ interface FileManagerServiceInterface
 {
     /**
      * @param UploadedFile $file
+     * @param string $storageDirName
      * @return string
      */
-    public function imagePostUpload(UploadedFile $file): string;
+    public function imageUpload(UploadedFile $file, string $storageDirName): string;
 
     /**
      * @param string $fileName
+     * @param string $storageDirName
      * @return mixed
      */
-    public function removePostImage(string $fileName);
+    public function removeImage(string $fileName, string  $storageDirName);
 }

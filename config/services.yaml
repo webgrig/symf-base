@@ -4,8 +4,10 @@
 # Put parameters here that don't need to change on each machine where the app is deployed
 # https://symfony.com/doc/current/best_practices.html#use-parameters-for-application-configuration
 parameters:
-    image_post_directory: '%kernel.project_dir%\public\uploads\post\'
-    assets_image_post_path: '/uploads/post/'
+    img_user_directory: '%kernel.project_dir%\public\uploads\user\'
+    img_post_directory: '%kernel.project_dir%\public\uploads\post\'
+    assets_img_user_path: '/uploads/user/'
+    assets_img_post_path: '/uploads/post/'
 
 services:
     # default configuration for services in *this* file
@@ -27,4 +29,5 @@ services:
     # please note that last definitions always *replace* previous ones
     App\Service\FileManagerService:
         arguments:
-            $postImageDirectory: '%image_post_directory%'
+            $userImgDirectory: '%img_user_directory%'
+            $postImgDirectory: '%img_post_directory%'

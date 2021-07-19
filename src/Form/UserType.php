@@ -11,6 +11,7 @@ use Egulias\EmailValidator\EmailValidator;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\EmailType;
+use Symfony\Component\Form\Extension\Core\Type\FileType;
 use Symfony\Component\Form\Extension\Core\Type\PasswordType;
 use Symfony\Component\Form\Extension\Core\Type\RepeatedType;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
@@ -41,6 +42,12 @@ class UserType extends AbstractType
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
         $builder
+            ->add('img', FileType::class, [
+                'label' => 'Аватар',
+                'required' => false,
+                'mapped' => false,
+
+            ])
             ->add('email', EmailType::class, [
                 'required' => false,
                 'label' => 'Email',

@@ -60,6 +60,11 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
      */
     private $full_name;
 
+    /**
+     * @ORM\Column(type="string", length=255, nullable=true)
+     */
+    private $img;
+
     public function __construct()
     {
         $this->roles_collection = new ArrayCollection();
@@ -121,7 +126,10 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 
     public function setRoles(array $roles = [])
     {
-        $roles[] = 'ROLE_GUEST';
+        if (!$roles){
+            $roles[] = 'ROLE_GUEST';
+        }
+
         $this->roles = array_unique($roles);
 
         return $this->roles;
@@ -208,11 +216,6 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
             $this->roles_collection[] = $rolesCollection;
 
         }
-        $roleGuestEntity = $this->userRepository->findOneBy(['title' => 'ROLE_GUEST']);
-        if (!$this->roles_collection->contains($roleGuestEntity)) {
-            $this->roles_collection[] = $roleGuestEntity;
-
-        }
 
         return $this;
     }
@@ -220,6 +223,18 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function removeRolesCollection(Role $rolesCollection): self
     {
         $this->roles_collection->removeElement($rolesCollection);
+
+        return $this;
+    }
+
+    public function getImg(): ?string
+    {
+        return $this->img;
+    }
+
+    public function setImg(?string $img): self
+    {
+        $this->img = $img;
 
         return $this;
     }

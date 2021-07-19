@@ -5,7 +5,9 @@ namespace App\Controller\Registration;
 use App\Entity\User;
 use App\Form\RegistrationFormType;
 use App\Repository\UserRepository;
+use App\Repository\UserRepositoryInterface;
 use App\Security\EmailVerifier;
+use App\Service\User\UserService;
 use Symfony\Bridge\Twig\Mime\TemplatedEmail;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -19,9 +21,15 @@ class RegistrationController extends AbstractController
 {
     private $emailVerifier;
 
-    public function __construct(EmailVerifier $emailVerifier)
+    /**
+     * @var UserService
+     */
+    private $userService;
+
+    public function __construct(EmailVerifier $emailVerifier, UserService $userService)
     {
         $this->emailVerifier = $emailVerifier;
+        $this->userService = $userService;
     }
 
     /**
@@ -50,7 +58,7 @@ class RegistrationController extends AbstractController
                     $form->get('plainPassword')->getData()
                 )
             );
-            $user->setRoles();
+            $this->userService->addRolesCollection($user);
 
             $entityManager = $this->getDoctrine()->getManager();
             $entityManager->persist($user);

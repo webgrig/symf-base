@@ -10,30 +10,36 @@ use Symfony\Component\HttpFoundation\File\UploadedFile;
 
 class FileManagerService implements FileManagerServiceInterface
 {
-    private $postImageDirectory;
+    private $userImgDirectory;
+    private $postImgDirectory;
 
-    public function __construct($postImageDirectory)
+    public function __construct($userImgDirectory, $postImgDirectory)
     {
-        $this->postImageDirectory = $postImageDirectory;
+        $this->userImgDirectory = $userImgDirectory;
+        $this->postImgDirectory = $postImgDirectory;
     }
 
     /**
-     * @return mixed
+     * @param string $prefix
+     * @return string
      */
-    public function getPostImageDirectory()
+    public function getImageDirectory(string $storageDirName): string
     {
-        return $this->postImageDirectory;
+        $directoryProperty = $storageDirName . 'ImgDirectory';
+        return $this->$directoryProperty;
     }
 
     /**
-     * @inheritDoc
+     * @param UploadedFile $file
+     * @param string $storageDirName
+     * @return string
      */
-    public function imagePostUpload(UploadedFile $file): string
+    public function imageUpload(UploadedFile $file, string  $storageDirName): string
     {
-        $fileName = uniqid() . '.' . $file->guessExtension();
+        $fileName = bin2hex(random_bytes(15)) . '.' . $file->guessExtension();
 
         try {
-            $file->move($this->getPostImageDirectory(), $fileName);
+            $file->move($this->getImageDirectory($storageDirName), $fileName);
         } catch (FileException $exception){
             return $exception;
         }
@@ -44,10 +50,10 @@ class FileManagerService implements FileManagerServiceInterface
     /**
      * @inheritDoc
      */
-    public function removePostImage(string $fileName)
+    public function removeImage(string $fileName, string  $storageDirName)
     {
         $fileSystem = new Filesystem();
-        $fileImage = $this->getPostImageDirectory() . $fileName;
+        $fileImage = $this->getImageDirectory($storageDirName) . $fileName;
         try {
             $fileSystem->remove($fileImage);
         } catch (FileException $exception){

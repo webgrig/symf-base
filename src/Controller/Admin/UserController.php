@@ -48,8 +48,8 @@ class UserController extends BaseController
      * @return RedirectResponse|Response
      */
 
-    public function createAction(Request $request, array $options = []){
-        $user = new User($this->userRepository);
+    public function createAction(Request $request){
+        $user = new User();
         $form = $this->userService->createForm($request, $user);
         if ($form->isSubmitted() && $form->isValid())
         {

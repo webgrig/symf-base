@@ -8,10 +8,13 @@ use App\Entity\Role;
 use App\Entity\User;
 use App\Form\UserType;
 use App\Repository\UserRepositoryInterface;
+use App\Service\FileManagerServiceInterface;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Form\Form;
 use Symfony\Component\Form\FormFactoryInterface;
+use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
 use Symfony\Component\Security\Core\Encoder\UserPasswordEncoderInterface;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\Routing\RouterInterface;
@@ -33,6 +36,10 @@ class UserService
 
     private $router;
 
+    private $fm;
+
+    private $user;
+
     /**
      * UserService constructor.
      * @param FormFactoryInterface $formFactory
@@ -43,13 +50,17 @@ class UserService
         FormFactoryInterface $formFactory,
         EntityManagerInterface $entityManager,
         UserPasswordEncoderInterface $passwordEncoder,
-        RouterInterface $router
+        RouterInterface $router,
+        FileManagerServiceInterface $fileManagerService,
+        TokenStorageInterface $tokenStorage
     )
     {
         $this->passwordEncoder = $passwordEncoder;
         $this->entityManager = $entityManager;
         $this->formFactory = $formFactory;
         $this->router = $router;
+        $this->fm = $fileManagerService;
+        $this->user = $tokenStorage->getToken()->getUser();
 
     }
 
@@ -70,10 +81,15 @@ class UserService
      * @param User $user
      * @param Form $form
      * @param bool $isVerified
-     * @param array|null $roles
      */
-    public function prepareEntity(User $user, Form $form, bool $isVerified = false, array $roles = NULL): void
+    public function prepareEntity(User $user, Form $form, bool $isVerified = false): void
     {
+        if (null !== $file = $form->get('img')->getData()){
+            if (null !== $userImg = $user->getImg()){
+                $this->fm->removeImage($userImg, 'user');
+            }
+            $user->setImg($this->fm->imageUpload($file, 'user'));
+        }
         if ($form->get('plainPassword')->getData()) {
             $password = $this->passwordEncoder->encodePassword($user, $form->get('plainPassword')->getData());
             $user->setPassword($password);
@@ -82,15 +98,13 @@ class UserService
         if (null !== $isVerified) {
             $user->setIsVerified($isVerified);
         }
-
-        if (null !== $roles) {
-            $user->setRoles($roles);
-        }
+        $this->addRolesCollection($user);
     }
 
     /**
      * @param User $user
-     * @return User
+     * @param UploadedFile $file
+     * @return object
      */
     public function save(User $user): object
     {
@@ -107,9 +121,9 @@ class UserService
     {
         $session = $request->getSession();
         $user = $this->entityManager->getRepository(User::class)->findOne($id);
-        if (!in_array('ROLE_SUPER', $user->getRoles())) {
+        if (!in_array('ROLE_SUPER', $this->user->getRoles())) {
             $session->getFlashBag()->add('error', 'У вас нет прав на удаление пользователей');
-        } elseif ($user->getId() == $id) {
+        } elseif ($this->user->getId() == $id) {
             $session->getFlashBag()->add('error', 'Вы не можете удалить сами себя');
         } elseif (in_array('ROLE_SUPER', $user->getRoles())) {
             $session->getFlashBag()->add('error', 'Невозможно удалить Супер-Админа');
@@ -119,5 +133,27 @@ class UserService
             $session->getFlashBag()->add('error', 'Пользователь удален');
         }
         return new RedirectResponse($this->router->generate('admin_user'));
+    }
+
+    public function addRolesCollection(User $user)
+    {
+        if (null == $user->getId()){
+            $user->setRoles();
+            $roles =  $user->getRoles();
+            $roles_collection = $this->entityManager->getRepository(Role::class)->findBy(['title' => $roles]);
+            foreach ($roles_collection as $role)
+            {
+                $user->addRolesCollection($role);
+            }
+        }
+        else{
+            $roles_collection = $user->getRolesCollection();
+            $roles = [];
+            foreach ($roles_collection as $role){
+                $roles[] = $role->getTitle();
+            }
+            $user->setRoles($roles);
+        }
+
     }
 }
