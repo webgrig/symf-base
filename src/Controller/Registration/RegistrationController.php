@@ -58,6 +58,7 @@ class RegistrationController extends AbstractController
                     $form->get('plainPassword')->getData()
                 )
             );
+            $user->setIsVerified(false);
             $this->userService->addRolesCollection($user);
 
             $entityManager = $this->getDoctrine()->getManager();

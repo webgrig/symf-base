@@ -44,7 +44,6 @@ class UserController extends BaseController
     /**
      * @Route("/admin/user/create", name="admin_user_create")
      * @param Request $request
-     * @param array $options
      * @return RedirectResponse|Response
      */
 
@@ -53,7 +52,7 @@ class UserController extends BaseController
         $form = $this->userService->createForm($request, $user);
         if ($form->isSubmitted() && $form->isValid())
         {
-            $this->userService->prepareEntity($user, $form, true);
+            $this->userService->prepareEntity($user, $form);
             $this->userService->save($user);
             $this->addFlash('success', 'Пользователь создан');
             return $this->redirectToRoute('admin_user');
@@ -69,7 +68,7 @@ class UserController extends BaseController
     /**
      * @Route("/admin/user/update/{id}", name="admin_user_update")
      * @param Request $request
-     * @param int $userId
+     * @param int $id
      * @return RedirectResponse|Response
      */
     public function updateAction(Request $request, int $id)

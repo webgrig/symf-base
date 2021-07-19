@@ -80,9 +80,8 @@ class UserService
     /**
      * @param User $user
      * @param Form $form
-     * @param bool $isVerified
      */
-    public function prepareEntity(User $user, Form $form, bool $isVerified = false): void
+    public function prepareEntity(User $user, Form $form): void
     {
         if (null !== $file = $form->get('img')->getData()){
             $this->deleteImg($user);
@@ -91,10 +90,6 @@ class UserService
         if ($form->get('plainPassword')->getData()) {
             $password = $this->passwordEncoder->encodePassword($user, $form->get('plainPassword')->getData());
             $user->setPassword($password);
-        }
-
-        if (null !== $isVerified) {
-            $user->setIsVerified($isVerified);
         }
         $this->addRolesCollection($user);
     }

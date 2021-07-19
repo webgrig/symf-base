@@ -37,7 +37,7 @@
 
         <div class="row no-gutters">
             <div class="col-12 mb-4">
-                <table class="table table-hover border-bottom">
+                <table class="table table-hover border-bottom text-center">
                     <thead>
                     <tr>
                         <th scope="col">#</th>
@@ -45,6 +45,7 @@
                         <th scope="col">email</th>
                         <th scope="col">ФИО</th>
                         <th scope="col">Роли</th>
+                        <th scope="col">Веривицикован</th>
                         <th scope="col">Действия</th>
                     </tr>
                     </thead>
@@ -59,6 +60,7 @@
                         <td>{{ user.email }}</td>
                         <td>{{ user.fullName }}</td>
                         <td>{{ user.roles | join(', ') }}</td>
+                        <td>{% if user.isVerified %}<a class="bi bi-check2-circle text-success"></a>{% else %}<a class="bi bi-x-circle text-danger"></a>{% endif %}</td>
                         <td><a href="{{ path('admin_user_update', {'id': user.id}) }}" class="bi bi-pencil-square" title="Создать пользователя"></a><a href="{{ path('admin_user_delete', {'id': user.id}) }}" class="bi bi-trash ml-3" title="Удалить пользователя"></a></td>
                     </tr>
 

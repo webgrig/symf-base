@@ -7,9 +7,9 @@ use App\Entity\User;
 use App\Form\EventListener\User\UserSubscriber;
 use App\Repository\UserRepositoryInterface;
 use Doctrine\ORM\EntityManagerInterface;
-use Egulias\EmailValidator\EmailValidator;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\AbstractType;
+use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
 use Symfony\Component\Form\Extension\Core\Type\EmailType;
 use Symfony\Component\Form\Extension\Core\Type\FileType;
 use Symfony\Component\Form\Extension\Core\Type\PasswordType;
@@ -106,6 +106,10 @@ class UserType extends AbstractType
                         ]),
                     ],
                 ]
+            ])
+            ->add('is_verified', CheckboxType::class, [
+                'label' => 'Verified',
+                'required' => false,
             ])
             ->add('save', SubmitType::class, [
                 'label' => 'Создать'
