@@ -8,37 +8,56 @@ use App\Entity\Role;
 use App\Entity\User;
 use App\Form\UserType;
 use App\Repository\UserRepositoryInterface;
-use App\Service\FileManagerServiceInterface;
+use App\Service\File\FileManagerInterface;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Form\Form;
 use Symfony\Component\Form\FormFactoryInterface;
-use Symfony\Component\HttpFoundation\File\UploadedFile;
-use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
 use Symfony\Component\Security\Core\Encoder\UserPasswordEncoderInterface;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\Routing\RouterInterface;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\Security\Core\User\UserInterface;
 
 class UserService
 {
     /**
      * @var UserRepositoryInterface
      */
-    private $entityManager;
+    private $em;
+
+    /**
+     * @var FileManagerInterface
+     */
+    private $fm;
+
 
     /**
      * @var UserPasswordEncoderInterface
      */
     private $passwordEncoder;
 
+    /**
+     * @var FormFactoryInterface
+     */
     private $formFactory;
 
+    /**
+     * @var RouterInterface
+     */
     private $router;
 
-    private $fm;
+    /**
+     * @var string|\Stringable|UserInterface
+     */
+    private $currentUserOfSession;
 
-    private $userSession;
+    private $request;
+
+    private $session;
+
+    private $form;
 
     /**
      * UserService constructor.
@@ -51,73 +70,78 @@ class UserService
         EntityManagerInterface $entityManager,
         UserPasswordEncoderInterface $passwordEncoder,
         RouterInterface $router,
-        FileManagerServiceInterface $fileManagerService,
-        TokenStorageInterface $tokenStorage
+        FileManagerInterface $fileManagerService,
+        TokenStorageInterface $tokenStorage,
+        RequestStack $requestStack
     )
     {
         $this->passwordEncoder = $passwordEncoder;
-        $this->entityManager = $entityManager;
+        $this->em = $entityManager;
         $this->formFactory = $formFactory;
         $this->router = $router;
         $this->fm = $fileManagerService;
-        $this->userSession = $tokenStorage->getToken()->getUser();
+        $this->currentUserOfSession = $tokenStorage->getToken()->getUser();
+        $this->request = $requestStack->getMainRequest();
+        $this->session = $this->request->getSession();
 
     }
 
     /**
-     * @param Request $request
      * @param User $user
      * @return Form
      */
 
-    public function createForm(Request $request, User $user): object
+    public function createForm(User $user): object
     {
-        $form = $this->formFactory->create(UserType::class, $user);
-        $form->handleRequest($request);
-        return $form;
+
+        $this->form = $this->formFactory->create(UserType::class, $user);
+        $this->form->handleRequest($this->request);
+        return $this->form;
     }
 
     /**
      * @param User $user
-     * @param Form $form
      */
-    public function prepareEntity(User $user, Form $form): void
+    public function prepareEntity(User $user): void
     {
-        if (null !== $file = $form->get('img')->getData()){
-            $this->deleteImg($user);
-            $user->setImg($this->fm->imageUpload($file, $user->getStorageDirName()));
-        }
-        if ($form->get('plainPassword')->getData()) {
-            $password = $this->passwordEncoder->encodePassword($user, $form->get('plainPassword')->getData());
+        if (null !== $this->form->get('plainPassword')->getData()) {
+            $password = $this->passwordEncoder->encodePassword($user, $this->form->get('plainPassword')->getData());
             $user->setPassword($password);
         }
-        $this->addRolesCollection($user);
+
+
+        if (null !== $this->form->get('roles_collection')->getData()) {
+            $this->addRolesCollection($user);
+        }
     }
 
 
     /**
      * @param User $user
+     * @return Role
      */
-    public function addRolesCollection(User $user): void
+    public function addRolesCollection(User $user): object
     {
-        if (null == $user->getId()){
-            $user->setRoles();
-            $roles =  $user->getRoles();
-            $roles_collection = $this->entityManager->getRepository(Role::class)->findBy(['title' => $roles]);
-            foreach ($roles_collection as $role)
-            {
-                $user->addRolesCollection($role);
-            }
-        }
-        else{
-            $roles_collection = $user->getRolesCollection();
-            $roles = [];
-            foreach ($roles_collection as $role){
-                $roles[] = $role->getTitle();
-            }
-            $user->setRoles($roles);
-        }
 
+        if (null == $user->getId()){
+            if (null == $user->getRolesCollection()){
+                $user->setRoles();
+                $roles =  $user->getRoles();
+                $roles_collection = $this->em->getRepository(Role::class)->findBy(['title' => $roles]);
+                foreach ($roles_collection as $role)
+                {
+                    $user->addRolesCollection($role);
+                }
+                return $user->getRolesCollection();
+            }
+        }
+        $roles_collection = $user->getRolesCollection();
+        $roles = [];
+        foreach ($roles_collection as $role){
+            $roles[] = $role->getTitle();
+        }
+        $user->setRoles($roles);
+        return $user->getRolesCollection();
     }
 
     /**
@@ -133,36 +157,43 @@ class UserService
 
     /**
      * @param User $user
-     * @param UploadedFile $file
      * @return object
      */
-    public function save(User $user): object
+    public function saveUser(User $user): object
     {
-        $this->entityManager->persist($user);
-        $this->entityManager->flush();
+        if (null !== $file = $this->form->get('img')->getData()){
+            $this->deleteImg($user);
+            $user->setImg($this->fm->imageUpload($file, $user->getStorageDirName()));
+        }
+        if (!$user->getId()){
+            $this->session->getFlashBag()->add('success', 'Пользователь создан');
+        }
+        else{
+            $this->session->getFlashBag()->add('success', 'Изменения сохранены');
+        }
+        $this->em->persist($user);
+        $this->em->flush();
         return $user;
     }
 
     /**
-     * @param Request $request
      * @param int $id
      * @return Response
      */
-    public function delete(Request $request, int $id): Response
+    public function deleteUser(int $id): Response
     {
-        $session = $request->getSession();
-        $user = $this->entityManager->getRepository(User::class)->findOne($id);
-        if (!in_array('ROLE_SUPER', $this->userSession->getRoles())) {
-            $session->getFlashBag()->add('error', 'У вас нет прав на удаление пользователей');
-        } elseif ($this->userSession->getId() == $id) {
-            $session->getFlashBag()->add('error', 'Вы не можете удалить сами себя');
+        $user = $this->em->getRepository(User::class)->findOne($id);
+        if (!in_array('ROLE_SUPER', $this->currentUserOfSession->getRoles())) {
+            $this->session->getFlashBag()->add('error', 'У вас нет прав на удаление пользователей');
+        } elseif ($this->currentUserOfSession->getId() == $id) {
+            $this->session->getFlashBag()->add('error', 'Вы не можете удалить сами себя');
         } elseif (in_array('ROLE_SUPER', $user->getRoles())) {
-            $session->getFlashBag()->add('error', 'Невозможно удалить Супер-Админа');
+            $this->session->getFlashBag()->add('error', 'Невозможно удалить Супер-Админа');
         } else {
             $this->deleteImg($user);
-            $this->entityManager->remove($user);
-            $this->entityManager->flush();
-            $session->getFlashBag()->add('error', 'Пользователь удален');
+            $this->em->remove($user);
+            $this->em->flush();
+            $this->session->getFlashBag()->add('error', 'Пользователь удален');
         }
         return new RedirectResponse($this->router->generate('admin_user'));
     }

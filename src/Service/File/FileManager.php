@@ -1,14 +1,14 @@
 <?php
 
 
-namespace App\Service;
+namespace App\Service\File;
 
 
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\HttpFoundation\File\Exception\FileException;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 
-class FileManagerService implements FileManagerServiceInterface
+class FileManager implements FileManagerInterface
 {
     private $userImgDirectory;
     private $postImgDirectory;

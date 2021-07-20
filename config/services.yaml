@@ -27,7 +27,7 @@ services:
 
     # add more service definitions when explicit configuration is needed
     # please note that last definitions always *replace* previous ones
-    App\Service\FileManagerService:
+    App\Service\File\FileManager:
         arguments:
             $userImgDirectory: '%img_user_directory%'
             $postImgDirectory: '%img_post_directory%'

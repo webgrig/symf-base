@@ -1,12 +1,12 @@
 <?php
 
 
-namespace App\Service;
+namespace App\Service\File;
 
 
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 
-interface FileManagerServiceInterface
+interface FileManagerInterface
 {
     /**
      * @param UploadedFile $file

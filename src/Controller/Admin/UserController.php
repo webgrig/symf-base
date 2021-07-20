@@ -8,7 +8,6 @@ use App\Entity\User;
 use App\Repository\UserRepositoryInterface;
 use App\Service\User\UserService;
 use Symfony\Component\HttpFoundation\RedirectResponse;
-use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 
@@ -24,6 +23,11 @@ class UserController extends BaseController
      */
     private $userService;
 
+    /**
+     * UserController constructor.
+     * @param UserRepositoryInterface $userRepository
+     * @param UserService $userService
+     */
     public function __construct(UserRepositoryInterface $userRepository, UserService $userService)
     {
         $this->userRepository =  $userRepository;
@@ -43,18 +47,16 @@ class UserController extends BaseController
 
     /**
      * @Route("/admin/user/create", name="admin_user_create")
-     * @param Request $request
      * @return RedirectResponse|Response
      */
 
-    public function createAction(Request $request){
+    public function createAction(){
         $user = new User();
-        $form = $this->userService->createForm($request, $user);
+        $form = $this->userService->createForm($user);
         if ($form->isSubmitted() && $form->isValid())
         {
             $this->userService->prepareEntity($user, $form);
-            $this->userService->save($user);
-            $this->addFlash('success', 'Пользователь создан');
+            $this->userService->saveUser($user);
             return $this->redirectToRoute('admin_user');
 
         }
@@ -66,27 +68,25 @@ class UserController extends BaseController
     }
 
     /**
-     * @Route("/admin/user/update/{id}", name="admin_user_update")
-     * @param Request $request
-     * @param int $id
+     * @Route("/admin/user/update/{user_id}", name="admin_user_update")
+     * @param int $user_id
      * @return RedirectResponse|Response
      */
-    public function updateAction(Request $request, int $id)
+    public function updateAction(int $user_id)
     {
-        $user = $this->userRepository->findOne($id);
-        $form = $this->userService->createForm($request, $user);
+        $user = $this->userRepository->findOne($user_id);
+        $form = $this->userService->createForm($user);
 
         if ($form->isSubmitted() && $form->isValid()){
 
             if ($form->get('save')->isClicked())
             {
                 $this->userService->prepareEntity($user, $form);
-                $this->userService->save($user);
-                $this->addFlash('success', 'Изменения сохранены');
+                $this->userService->saveUser($user);
             }
             if ($form->get('delete')->isClicked())
             {
-                return $this->delete($request, $user->getId());
+                return $this->deleteAction($user->getId());
             }
             return $this->redirectToRoute('admin_user');
         }
@@ -99,13 +99,12 @@ class UserController extends BaseController
     }
 
     /**
-     * @Route("/admin/user/delete/{id}", name="admin_user_delete")
-     * @param Request $request
-     * @param int $id
+     * @Route("/admin/user/delete/{user_id}", name="admin_user_delete")
+     * @param int $user_id
      * @return Response
      */
-    public function delete(Request $request, int $id): Response
+    public function deleteAction(int $user_id): Response
     {
-        return $this->userService->delete($request, $id);
+        return $this->userService->deleteUser($user_id);
     }
 }

@@ -3,7 +3,7 @@
 namespace App\Repository;
 
 use App\Entity\Post;
-use App\Service\FileManagerServiceInterface;
+use App\Service\File\FileManagerInterface;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\EntityManagerInterface;
@@ -21,7 +21,7 @@ class PostRepository extends ServiceEntityRepository implements PostRepositoryIn
     private $em;
     private $fm;
 
-    public function __construct(ManagerRegistry $registry, EntityManagerInterface $manager, FileManagerServiceInterface $fileManagerService)
+    public function __construct(ManagerRegistry $registry, EntityManagerInterface $manager, FileManagerInterface $fileManagerService)
     {
         $this->em = $manager;
         $this->fm = $fileManagerService;
