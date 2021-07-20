@@ -12,6 +12,7 @@ use App\Service\File\FileManagerInterface;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Form\Form;
 use Symfony\Component\Form\FormFactoryInterface;
+use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
 use Symfony\Component\Security\Core\Encoder\UserPasswordEncoderInterface;
@@ -19,6 +20,7 @@ use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\Routing\RouterInterface;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Security\Core\User\UserInterface;
+use function PHPUnit\Framework\isEmpty;
 
 class UserService
 {
@@ -93,9 +95,9 @@ class UserService
 
     public function createForm(User $user): object
     {
-
         $this->form = $this->formFactory->create(UserType::class, $user);
         $this->form->handleRequest($this->request);
+
         return $this->form;
     }
 
@@ -104,15 +106,11 @@ class UserService
      */
     public function prepareEntity(User $user): void
     {
-        if (null !== $this->form->get('plainPassword')->getData()) {
-            $password = $this->passwordEncoder->encodePassword($user, $this->form->get('plainPassword')->getData());
+        if (null !== $password = $user->getPlainPassword()) {
+            $password = $this->passwordEncoder->encodePassword($user, $password);
             $user->setPassword($password);
         }
-
-
-        if (null !== $this->form->get('roles_collection')->getData()) {
-            $this->addRolesCollection($user);
-        }
+        $this->updateRolesCollection($user);
     }
 
 
@@ -120,11 +118,10 @@ class UserService
      * @param User $user
      * @return Role
      */
-    public function addRolesCollection(User $user): object
+    public function updateRolesCollection(User $user): object
     {
-
         if (null == $user->getId()){
-            if (null == $user->getRolesCollection()){
+            if (!count($user->getRolesCollection())){
                 $user->setRoles();
                 $roles =  $user->getRoles();
                 $roles_collection = $this->em->getRepository(Role::class)->findBy(['title' => $roles]);
@@ -162,8 +159,10 @@ class UserService
     public function saveUser(User $user): object
     {
         if (null !== $file = $this->form->get('img')->getData()){
-            $this->deleteImg($user);
-            $user->setImg($this->fm->imageUpload($file, $user->getStorageDirName()));
+            if ($file instanceof UploadedFile){
+                $this->deleteImg($user);
+                $user->setImg($this->fm->imageUpload($file, $user->getStorageDirName()));
+            }
         }
         if (!$user->getId()){
             $this->session->getFlashBag()->add('success_create', 'Пользователь создан');
