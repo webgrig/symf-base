@@ -79,13 +79,14 @@ class RegistrationController extends AbstractController
     }
 
     /**
-     * @Route("/register/send-confirmation/{id}", name="send-confirmation")
+     * @Route("/register/send-confirmation/{id}/{force?}", name="send-confirmation")
      * @param Request $request
      * @param UserRepository $userRepository
      * @return Response
      */
     public function sendConfirmation(Request $request, UserRepository $userRepository): Response
     {
+
         $id = $request->get('id');
 
         if (null === $id) {
@@ -94,10 +95,10 @@ class RegistrationController extends AbstractController
 
         $user = $userRepository->find($id);
 
-        if (null === $user) {
+        if (null === $user->getId()) {
             return $this->redirectToRoute('app_register');
         }
-        if(!$user->isVerified()){
+        if(!$user->isVerified() || $request->get('force')){
             // generate a signed url and email it to the user
             $this->emailVerifier->sendEmailConfirmation('app_verify_email', $user,
                 (new TemplatedEmail())
@@ -111,6 +112,9 @@ class RegistrationController extends AbstractController
         }
         else{
             return $this->redirectToRoute('app_verify_email', ['id' => $user->getId()]);
+        }
+        if ($request->get('force')){
+            return $this->redirectToRoute('admin_user', ['userCrateId' => $user->getId()]);
         }
 
         return $this->render('registration/confirm-page.html.twig', ['id' => $user->getId()]);

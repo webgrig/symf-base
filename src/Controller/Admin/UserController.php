@@ -8,6 +8,7 @@ use App\Entity\User;
 use App\Repository\UserRepositoryInterface;
 use App\Service\User\UserService;
 use Symfony\Component\HttpFoundation\RedirectResponse;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 
@@ -36,12 +37,14 @@ class UserController extends BaseController
 
     /**
      * @Route("/admin/user", name="admin_user")
+     * @param Request $request
      * @return Response
      */
-    public function indexAction(){
+    public function indexAction(Request $request){
         $forRender = parent::renderDefault();
         $forRender['title'] = 'Пользователи';
         $forRender['users'] = $this->userRepository->getAll();
+        $forRender['userCrateId'] = $request->get('userCrateId');
         return $this->render('admin/user/index.html.twig', $forRender);
     }
 
@@ -57,7 +60,7 @@ class UserController extends BaseController
         {
             $this->userService->prepareEntity($user, $form);
             $this->userService->saveUser($user);
-            return $this->redirectToRoute('admin_user');
+            return $this->redirectToRoute('admin_user', ['userCrateId' => $user->getId()]);
 
         }
         $forRender = parent::renderDefault();

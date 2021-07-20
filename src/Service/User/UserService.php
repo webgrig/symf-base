@@ -166,7 +166,7 @@ class UserService
             $user->setImg($this->fm->imageUpload($file, $user->getStorageDirName()));
         }
         if (!$user->getId()){
-            $this->session->getFlashBag()->add('success', 'Пользователь создан');
+            $this->session->getFlashBag()->add('success_create', 'Пользователь создан');
         }
         else{
             $this->session->getFlashBag()->add('success', 'Изменения сохранены');
