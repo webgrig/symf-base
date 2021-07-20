@@ -20,7 +20,6 @@ use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\Routing\RouterInterface;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Security\Core\User\UserInterface;
-use function PHPUnit\Framework\isEmpty;
 
 class UserService
 {
@@ -53,7 +52,7 @@ class UserService
     /**
      * @var string|\Stringable|UserInterface
      */
-    private $currentUserOfSession;
+    private $tokenStorage;
 
     private $request;
 
@@ -82,7 +81,7 @@ class UserService
         $this->formFactory = $formFactory;
         $this->router = $router;
         $this->fm = $fileManagerService;
-        $this->currentUserOfSession = $tokenStorage->getToken()->getUser();
+        $this->tokenStorage = $tokenStorage;
         $this->request = $requestStack->getMainRequest();
         $this->session = $this->request->getSession();
 
@@ -181,10 +180,11 @@ class UserService
      */
     public function deleteUser(int $id): Response
     {
+        $currentUserOfSession = $this->tokenStorage->getToken()->getUser();
         $user = $this->em->getRepository(User::class)->findOne($id);
-        if (!in_array('ROLE_SUPER', $this->currentUserOfSession->getRoles())) {
+        if (!in_array('ROLE_SUPER', $currentUserOfSession->getRoles())) {
             $this->session->getFlashBag()->add('error', 'У вас нет прав на удаление пользователей');
-        } elseif ($this->currentUserOfSession->getId() == $id) {
+        } elseif ($currentUserOfSession->getId() == $id) {
             $this->session->getFlashBag()->add('error', 'Вы не можете удалить сами себя');
         } elseif (in_array('ROLE_SUPER', $user->getRoles())) {
             $this->session->getFlashBag()->add('error', 'Невозможно удалить Супер-Админа');

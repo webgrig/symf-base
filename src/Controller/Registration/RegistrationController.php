@@ -59,7 +59,7 @@ class RegistrationController extends AbstractController
                 )
             );
             $user->setIsVerified(false);
-            $this->userService->addRolesCollection($user);
+            $this->userService->updateRolesCollection($user);
 
             $entityManager = $this->getDoctrine()->getManager();
             $entityManager->persist($user);
