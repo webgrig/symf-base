@@ -40,7 +40,8 @@
                         </button>
                         <hr>
                         <div class="text-right mt-3">
-                            <a href="{{ path('send-confirmation', {'force': 1, 'id': userCrateId}) }}">Послать сообщение?</a>
+                            <a href="{{ path('send-confirmation', {'force': 1, 'id': userCrateId}) }}">Послать
+                                сообщение?</a>
                         </div>
                     </div>
                 {% endfor %}
@@ -52,7 +53,8 @@
                         </button>
                         <hr>
                         <div class="text-right mt-3">
-                            <a href="{{ path('send-confirmation', {'force': 1, 'id': userCrateId}) }}">Послать повторно?</a>
+                            <a href="{{ path('send-confirmation', {'force': 1, 'id': userCrateId}) }}">Послать
+                                повторно?</a>
                         </div>
                     </div>
                 {% endfor %}
@@ -75,25 +77,27 @@
                     </thead>
                     <tbody>
                     {% for user in users %}
-                    <tr>
-                        <td scope="row">{{ user.id }}</td>
-                        <td>
-                            {% if user.img is null%}
-                                <img src="{{ asset('uploads/user/no_image.jpg') }}" alt=""  width="100">
-                            {% else %}
-                                <img src="{{ assets_img_user_path }}{{ user.img }}" alt=""  width="100">
-                            {% endif %}
-                        </td>
-                        <td>{{ user.email }}</td>
-                        <td>{{ user.fullName }}</td>
-                        <td>{{ user.roles | join(', ') }}</td>
-                        <td>
-                            {% if user.isVerified %}<a class="bi bi-check2-circle text-success"></a>{% else %}<a class="bi bi-x-circle text-danger"></a>{% endif %}
-                        </td>
-                        <td>
-                            <a href="{{ path('admin_user_update', {'user_id': user.id}) }}" class="bi bi-pencil-square" title="Редактировать пользователя"></a><a href="{{ path('admin_user_delete', {'user_id': user.id}) }}" class="bi bi-trash ml-3" title="Удалить пользователя"></a>
-                        </td>
-                    </tr>
+                        <tr>
+                            <td scope="row">{{ user.id }}</td>
+                            <td>
+                                {% if user.img is null %}
+                                    <img src="{{ asset('uploads/user/no_image.jpg') }}" alt="" width="100">
+                                {% else %}
+                                    <img src="{{ asset('uploads/user/') }}{{ user.img }}" alt="" width="100">
+                                {% endif %}
+                            </td>
+                            <td>{{ user.email }}</td>
+                            <td>{{ user.fullName }}</td>
+                            <td>{{ user.roles | join(', ') }}</td>
+                            <td>
+                                {% if user.isVerified %}<a class="bi bi-check2-circle text-success"></a>{% else %}<a
+                                        class="bi bi-x-circle text-danger"></a>{% endif %}
+                            </td>
+                            <td>
+                                <a href="{{ path('admin_user_update', {'user_id': user.id}) }}"
+                                   class="bi bi-pencil-square" title="Редактировать пользователя"></a> <a href="#" data-href="{{ path('admin_user_delete', {'user_id': user.id}) }}" data-toggle="modal" data-target="#confirmModal" data-entity-id="{{ user.id }}" class="bi bi-trash ml-3" title="Удалить пользователя"></a>
+                            </td>
+                        </tr>
 
                     {% endfor %}
                     </tbody>
@@ -101,5 +105,6 @@
             </div>
         </div>
     </div>
+    {% include 'admin/user/_partials/modal.html.twig' %}
 
 {% endblock %}

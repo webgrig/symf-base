@@ -4,8 +4,7 @@
 namespace App\Form\EventListener\Category;
 
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
-use Symfony\Component\Form\Extension\Core\Type\PasswordType;
-use Symfony\Component\Form\Extension\Core\Type\RepeatedType;
+use Symfony\Component\Form\Extension\Core\Type\ButtonType;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\Form\FormEvent;
 use Symfony\Component\Form\FormEvents;
@@ -35,10 +34,15 @@ class CategorySubscriber implements EventSubscriberInterface
                         'class' => 'btn btn-primary mt-3 mb-3'
                     ]
                 ])
-                ->add('delete', SubmitType::class, [
+
+                ->add('delete', ButtonType::class, [
                     'label' => 'Удалить',
                     'attr' => [
-                        'class' => 'btn btn-danger ml-3 mt-3 mb-3'
+                        'class' => 'btn btn-danger ml-3 mt-3 mb-3',
+                        'data-toggle' => 'modal',
+                        'data-target' => '#confirmModal',
+                        'data-entity-id' => $category->getId(),
+                        'data-href' => '/admin/category/delete/' . $category->getId(),
                     ]
                 ])
             ;

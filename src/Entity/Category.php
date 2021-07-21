@@ -38,8 +38,6 @@ class Category
     private $description;
 
 
-
-
     /**
      * @ORM\Column(type="string", length=255, nullable=true)
      */

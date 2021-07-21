@@ -49,8 +49,8 @@
                         <thead>
                         <tr>
                             <th scope="col">#</th>
-                            <th scope="col">Заголовок</th>
                             <th scope="col">Превью</th>
+                            <th scope="col">Заголовок</th>
                             <th scope="col">Опубликована</th>
                             <th scope="col">Действия</th>
                         </tr>
@@ -59,21 +59,22 @@
                         {% for category in categories %}
                             <tr>
                                 <th scope="row">{{ category.id }}</th>
-                                <td>{{ category.title }}</td>
                                 <td>
                                     {% if category.img is null%}
 
                                         <img src="{{ asset('uploads/category/no_image.jpg') }}" alt=""  width="100">
                                     {% else %}
-                                        <img src="{{ assets_img_category_path }}{{ category.img }}" alt=""  width="100">
+                                        <img src="{{ asset('uploads/category/') }}{{ category.img }}" alt=""  width="100">
                                     {% endif %}
                                 </td>
+
+                                <td>{{ category.title }}</td>
 
                                 <td>
                                     {% if category.isPublished %}<a class="bi bi-check2-circle text-success"></a>{% else %}<a class="bi bi-x-circle text-danger"></a>{% endif %}
                                 </td>
                                 <td>
-                                    <a href="{{ path('admin_category_update', {'category_id': category.id}) }}" class="bi bi-pencil-square" title="Редактировать категорию"></a><a href="{{ path('admin_category_delete', {'category_id': category.id }) }}" class="bi bi-trash ml-3" title="Удалить Категорию"></a>
+                                    <a href="{{ path('admin_category_update', {'category_id': category.id}) }}" class="bi bi-pencil-square" title="Редактировать категорию"></a><a href="#" data-href="{{ path('admin_category_delete', {'category_id': category.id }) }}" data-toggle="modal" data-target="#confirmModal" data-entity-id="{{ category.id }}" class="bi bi-trash ml-3" title="Удалить категорию"></a>
                                 </td>
                             </tr>
 
@@ -85,4 +86,5 @@
         {% endif %}
     </div>
 
+    {% include 'admin/category/_partials/modal.html.twig' %}
 {% endblock %}

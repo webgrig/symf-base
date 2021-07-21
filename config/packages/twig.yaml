@@ -2,9 +2,9 @@ twig:
     default_path: '%kernel.project_dir%/templates'
     form_themes: [ 'bootstrap_4_layout.html.twig' ]
     globals:
-        assets_img_user_path: '%assets_img_user_path%'
-        assets_img_category_path: '%assets_img_category_path%'
-        assets_img_post_path: '%assets_img_post_path%'
+#        assets_img_user_path: '%assets_img_user_path%'
+#        assets_img_category_path: '%assets_img_category_path%'
+#        assets_img_post_path: '%assets_img_post_path%'
 
 when@test:
     twig:

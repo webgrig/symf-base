@@ -4,6 +4,7 @@
 namespace App\Form\EventListener\User;
 
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
+use Symfony\Component\Form\Extension\Core\Type\ButtonType;
 use Symfony\Component\Form\Extension\Core\Type\PasswordType;
 use Symfony\Component\Form\Extension\Core\Type\RepeatedType;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
@@ -35,10 +36,14 @@ class UserSubscriber implements EventSubscriberInterface
                         'class' => 'btn btn-primary mt-3 mb-3'
                     ]
                 ])
-                ->add('delete', SubmitType::class, [
+                ->add('delete', ButtonType::class, [
                     'label' => 'Удалить',
                     'attr' => [
-                        'class' => 'btn btn-danger ml-3 mt-3 mb-3'
+                        'class' => 'btn btn-danger ml-3 mt-3 mb-3',
+                        'data-toggle' => 'modal',
+                        'data-target' => '#confirmModal',
+                        'data-entity-id' => $user->getId(),
+                        'data-href' => '/admin/user/delete/' . $user->getId(),
                     ]
                 ])
                 ->add('plainPassword', RepeatedType::class, [
