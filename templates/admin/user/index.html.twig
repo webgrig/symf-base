@@ -79,6 +79,7 @@
                         <td scope="row">{{ user.id }}</td>
                         <td>
                             {% if user.img is null%}
+                                <img src="{{ asset('uploads/user/no_image.jpg') }}" alt=""  width="100">
                             {% else %}
                                 <img src="{{ assets_img_user_path }}{{ user.img }}" alt=""  width="100">
                             {% endif %}

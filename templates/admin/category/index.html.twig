@@ -62,6 +62,8 @@
                                 <td>{{ category.title }}</td>
                                 <td>
                                     {% if category.img is null%}
+
+                                        <img src="{{ asset('uploads/category/no_image.jpg') }}" alt=""  width="100">
                                     {% else %}
                                         <img src="{{ assets_img_category_path }}{{ category.img }}" alt=""  width="100">
                                     {% endif %}
