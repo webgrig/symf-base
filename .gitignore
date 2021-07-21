@@ -8,8 +8,8 @@
 /public/build/
 /public/img/
 /public/uploads/*
-!/public/uploads/no_image_user.jpg
-!/public/uploads/no_image_category.jpg
+!/public/uploads/user/no_image.jpg
+!/public/uploads/category/no_image.jpg
 /var/
 /vendor/
 /migrations/
