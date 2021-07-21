@@ -26,12 +26,14 @@ class CategoryType extends AbstractType
             ])
             ->add('title', TextType::class, [
                 'label' => 'Заголовок категории',
+                'required' => false,
                 'attr' => [
                     'placeholder' => 'Введите текст'
                 ]
             ])
             ->add('description', TextareaType::class, [
                 'label' => 'Описание категории',
+                'required' => false,
                 'attr' => [
                     'placeholder' => 'Введите описание'
                 ]
