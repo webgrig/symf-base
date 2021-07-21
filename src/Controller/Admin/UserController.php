@@ -5,20 +5,13 @@ namespace App\Controller\Admin;
 
 
 use App\Entity\User;
-use App\Repository\UserRepositoryInterface;
 use App\Service\User\UserService;
 use Symfony\Component\HttpFoundation\RedirectResponse;
-use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 
 class UserController extends BaseController
 {
-    /**
-     * @var UserRepositoryInterface
-     */
-    private $userRepository;
-
     /**
      * @var UserService
      */
@@ -26,25 +19,22 @@ class UserController extends BaseController
 
     /**
      * UserController constructor.
-     * @param UserRepositoryInterface $userRepository
      * @param UserService $userService
      */
-    public function __construct(UserRepositoryInterface $userRepository, UserService $userService)
+    public function __construct(UserService $userService)
     {
-        $this->userRepository =  $userRepository;
         $this->userService = $userService;
     }
 
     /**
      * @Route("/admin/user", name="admin_user")
-     * @param Request $request
      * @return Response
      */
-    public function indexAction(Request $request){
+    public function indexAction(){
         $forRender = parent::renderDefault();
         $forRender['title'] = 'Пользователи';
-        $forRender['users'] = $this->userRepository->findAll();
-        $forRender['userCrateId'] = $request->get('userCrateId');
+        $forRender['users'] = $this->userService->getAllEntities();
+        $forRender['cratedEntityId'] = $this->userService->getCratedEntityId();
         return $this->render('admin/user/index.html.twig', $forRender);
     }
 
@@ -60,7 +50,7 @@ class UserController extends BaseController
         {
             $this->userService->prepareEntity($user, $form);
             $this->userService->save($user);
-            return $this->redirectToRoute('admin_user', ['userCrateId' => $user->getId()]);
+            return $this->redirectToRoute('admin_user', ['cratedEntityId' => $user->getId()]);
 
         }
         $forRender = parent::renderDefault();
@@ -77,7 +67,7 @@ class UserController extends BaseController
      */
     public function updateAction(int $user_id)
     {
-        $user = $this->userRepository->find($user_id);
+        $user = $this->userService->getEntity($user_id);
         $form = $this->userService->createForm($user);
 
         if ($form->isSubmitted() && $form->isValid()){
@@ -87,7 +77,7 @@ class UserController extends BaseController
                 $this->userService->prepareEntity($user, $form);
                 $this->userService->save($user);
             }
-            if ($form->get('delete')->isClicked())
+            elseif ($form->get('delete')->isSubmitted())
             {
                 return $this->deleteAction($user->getId());
             }

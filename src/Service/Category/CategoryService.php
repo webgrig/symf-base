@@ -95,6 +95,28 @@ class CategoryService
         return $this->form;
     }
 
+    /**
+     * @return array
+     */
+    public function getAllEntities(): array
+    {
+       $categories =  $this->em->getRepository(Category::class)->findAll();
+        if (!$categories){
+            $this->session->getFlashBag()->add('error', 'В настоящий момент нет ни одной категории.');
+        }
+        return $categories;
+    }
+
+    /**
+     * @param int $id
+     * @return Category
+     */
+
+    public function getEntity(int $id) : object
+    {
+        return $this->em->getRepository(Category::class)->find($id);
+    }
+
 
     /**
      * @param Category $category

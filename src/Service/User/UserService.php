@@ -52,7 +52,7 @@ class UserService
     /**
      * @var string|\Stringable|UserInterface
      */
-    private $tokenStorage;
+    private $currentUserOfSession = null;
 
     private $request;
 
@@ -84,10 +84,12 @@ class UserService
         $this->formFactory = $formFactory;
         $this->router = $router;
         $this->fm = $fileManagerService;
-        $this->tokenStorage = $tokenStorage;
         $this->request = $requestStack->getMainRequest();
         $this->session = $this->request->getSession();
         $this->userImgDirectory = $userImgDirectory;
+        if (null !== $tokenStorage->getToken()){
+            $this->currentUserOfSession = $tokenStorage->getToken()->getUser();
+        }
 
     }
 
@@ -102,6 +104,28 @@ class UserService
         $this->form->handleRequest($this->request);
 
         return $this->form;
+    }
+
+    /**
+     * @return array
+     */
+    public function getAllEntities(): array
+    {
+        $users =  $this->em->getRepository(User::class)->findAll();
+        if (!$users){
+            $this->session->getFlashBag()->add('error', 'В настоящий момент нет ни одной статьи.');
+        }
+        return $users;
+    }
+
+    /**
+     * @param int $id
+     * @return User
+     */
+
+    public function getEntity(int $id) : object
+    {
+        return $this->em->getRepository(User::class)->find($id);
     }
 
     /**
@@ -178,17 +202,24 @@ class UserService
         return $user;
     }
 
+    public function getCratedEntityId()
+    {
+        if (null !== $cratedEntityId = $this->request->get('cratedEntityId')){
+            return $cratedEntityId;
+        }
+    }
+
+
     /**
      * @param int $id
      * @return Response
      */
     public function delete(int $id): Response
     {
-        $currentUserOfSession = $this->tokenStorage->getToken()->getUser();
         $user = $this->em->getRepository(User::class)->find($id);
-        if (!in_array('ROLE_SUPER', $currentUserOfSession->getRoles())) {
+        if (!in_array('ROLE_SUPER', $this->currentUserOfSession->getRoles())) {
             $this->session->getFlashBag()->add('error', 'У вас нет прав на удаление пользователей');
-        } elseif ($currentUserOfSession->getId() == $id) {
+        } elseif ($this->currentUserOfSession->getId() == $id) {
             $this->session->getFlashBag()->add('error', 'Вы не можете удалить сами себя');
         } elseif (in_array('ROLE_SUPER', $user->getRoles())) {
             $this->session->getFlashBag()->add('error', 'Невозможно удалить Супер-Админа');

@@ -3,13 +3,11 @@
 
 namespace App\Controller\Admin;
 
+
 use App\Entity\Post;
-use App\Form\PostType;
-use App\Repository\CategoryRepositoryInterface;
 use App\Repository\PostRepositoryInterface;
 use App\Service\Post\PostService;
 use Symfony\Component\HttpFoundation\RedirectResponse;
-use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 
@@ -20,22 +18,20 @@ use Symfony\Component\Routing\Annotation\Route;
  */
 class PostController extends BaseController
 {
+    private $postRepository;
 
-    /**
-     * @var PostService
-     */
     private $postService;
 
     /**
      * PostController constructor.
+     * @param PostRepositoryInterface $postRepository
      * @param PostService $postService
-     * @param CategoryRepositoryInterface $categoryRepository
      */
-    public function __construct(PostService $postService,
-                                CategoryRepositoryInterface $categoryRepository)
+    public function __construct(PostRepositoryInterface $postRepository,
+                                PostService $postService)
     {
+        $this->postRepository = $postRepository;
         $this->postService = $postService;
-        $this->categoryRepository = $categoryRepository;
     }
 
     /**
@@ -45,7 +41,7 @@ class PostController extends BaseController
     {
         $forRender = parent::renderDefault();
         $forRender['title'] = 'Посты';
-        $forRender['categories'] = $this->categoryRepository->getAllCategories();
+        $forRender['categories'] = $this->postRepository->findAll();
         return $this->render('admin/post/index.html.twig', $forRender);
     }
 

@@ -114,7 +114,7 @@ class RegistrationController extends AbstractController
             return $this->redirectToRoute('app_verify_email', ['id' => $user->getId()]);
         }
         if ($request->get('force')){
-            return $this->redirectToRoute('admin_user', ['userCrateId' => $user->getId()]);
+            return $this->redirectToRoute('admin_user', ['cratedEntityId' => $user->getId()]);
         }
 
         return $this->render('registration/confirm-page.html.twig', ['id' => $user->getId()]);

@@ -4,13 +4,8 @@ namespace App\Controller\Admin;
 
 
 use App\Entity\Category;
-use App\Entity\Post;
-use App\Form\CategoryType;
-use App\Repository\CategoryRepositoryInterface;
 use App\Service\Category\CategoryService;
-use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\HttpFoundation\RedirectResponse;
-use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 
@@ -20,18 +15,14 @@ use Symfony\Component\Routing\Annotation\Route;
  */
 class CategoryController extends BaseController
 {
-    private $categoryRepository;
-
     private $categoryService;
 
     /**
      * CategoryController constructor.
-     * @param CategoryRepositoryInterface $categoryRepository
      * @param CategoryService $categoryService
      */
-    public function __construct(CategoryRepositoryInterface $categoryRepository, CategoryService $categoryService)
+    public function __construct(CategoryService $categoryService)
     {
-        $this->categoryRepository = $categoryRepository;
         $this->categoryService =  $categoryService;
     }
     /**
@@ -41,10 +32,7 @@ class CategoryController extends BaseController
     {
         $forRender = parent::renderDefault();
         $forRender['title'] = 'Категории';
-        $forRender['categories'] = $this->categoryRepository->findAll();
-        if (!$forRender['categories']){
-            $this->addFlash('error', 'В настоящий момент нет ни одной категории.');
-        }
+        $forRender['categories'] = $this->categoryService->getAllEntities();
         return $this->render('admin/category/index.html.twig', $forRender);
     }
 
@@ -77,7 +65,7 @@ class CategoryController extends BaseController
      */
     public function updateAction(int $category_id)
     {
-        $category = $this->categoryRepository->find($category_id);
+        $category = $this->categoryService->getEntity($category_id);
         $form = $this->categoryService->createForm($category);
 
         if ($form->isSubmitted() && $form->isValid())
@@ -86,7 +74,7 @@ class CategoryController extends BaseController
             {
                 $this->categoryService->save($category);
             }
-            if ($form->get('delete')->isClicked())
+            elseif ($form->get('delete')->isSubmitted())
             {
                 return $this->deleteAction($category->getId());
 
