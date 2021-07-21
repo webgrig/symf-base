@@ -77,15 +77,21 @@
                     {% for user in users %}
                     <tr>
                         <td scope="row">{{ user.id }}</td>
-                        <td>{% if user.img is null%}
+                        <td>
+                            {% if user.img is null%}
                             {% else %}
                                 <img src="{{ assets_img_user_path }}{{ user.img }}" alt=""  width="100">
-                            {% endif %}</td>
+                            {% endif %}
+                        </td>
                         <td>{{ user.email }}</td>
                         <td>{{ user.fullName }}</td>
                         <td>{{ user.roles | join(', ') }}</td>
-                        <td>{% if user.isVerified %}<a class="bi bi-check2-circle text-success"></a>{% else %}<a class="bi bi-x-circle text-danger"></a>{% endif %}</td>
-                        <td><a href="{{ path('admin_user_update', {'user_id': user.id}) }}" class="bi bi-pencil-square" title="Создать пользователя"></a><a href="{{ path('admin_user_delete', {'user_id': user.id}) }}" class="bi bi-trash ml-3" title="Удалить пользователя"></a></td>
+                        <td>
+                            {% if user.isVerified %}<a class="bi bi-check2-circle text-success"></a>{% else %}<a class="bi bi-x-circle text-danger"></a>{% endif %}
+                        </td>
+                        <td>
+                            <a href="{{ path('admin_user_update', {'user_id': user.id}) }}" class="bi bi-pencil-square" title="Редактировать пользователя"></a><a href="{{ path('admin_user_delete', {'user_id': user.id}) }}" class="bi bi-trash ml-3" title="Удалить пользователя"></a>
+                        </td>
                     </tr>
 
                     {% endfor %}

@@ -43,7 +43,7 @@ class UserController extends BaseController
     public function indexAction(Request $request){
         $forRender = parent::renderDefault();
         $forRender['title'] = 'Пользователи';
-        $forRender['users'] = $this->userRepository->getAll();
+        $forRender['users'] = $this->userRepository->findAll();
         $forRender['userCrateId'] = $request->get('userCrateId');
         return $this->render('admin/user/index.html.twig', $forRender);
     }
@@ -59,7 +59,7 @@ class UserController extends BaseController
         if ($form->isSubmitted() && $form->isValid())
         {
             $this->userService->prepareEntity($user, $form);
-            $this->userService->saveUser($user);
+            $this->userService->save($user);
             return $this->redirectToRoute('admin_user', ['userCrateId' => $user->getId()]);
 
         }
@@ -77,7 +77,7 @@ class UserController extends BaseController
      */
     public function updateAction(int $user_id)
     {
-        $user = $this->userRepository->findOne($user_id);
+        $user = $this->userRepository->find($user_id);
         $form = $this->userService->createForm($user);
 
         if ($form->isSubmitted() && $form->isValid()){
@@ -85,7 +85,7 @@ class UserController extends BaseController
             if ($form->get('save')->isClicked())
             {
                 $this->userService->prepareEntity($user, $form);
-                $this->userService->saveUser($user);
+                $this->userService->save($user);
             }
             if ($form->get('delete')->isClicked())
             {
@@ -97,7 +97,6 @@ class UserController extends BaseController
         $forRender = parent::renderDefault();
         $forRender['title'] = 'Редактирование пользователя';
         $forRender['form'] = $form->createView();
-        $forRender['deleteButton'] = true;
         return $this->render('admin/user/form.html.twig', $forRender);
     }
 
@@ -108,6 +107,6 @@ class UserController extends BaseController
      */
     public function deleteAction(int $user_id): Response
     {
-        return $this->userService->deleteUser($user_id);
+        return $this->userService->delete($user_id);
     }
 }

@@ -8,6 +8,7 @@ use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
+ * @ORM\HasLifecycleCallbacks()
  * @ORM\Entity(repositoryClass=CategoryRepository::class)
  */
 class Category
@@ -33,30 +34,36 @@ class Category
      */
     private $description;
 
-    /**
-     * @ORM\Column(type="datetime")
-     */
-    private $create_at;
 
-    /**
-     * @ORM\Column(type="datetime")
-     */
-    private $update_at;
 
-    /**
-     * @ORM\Column(type="boolean")
-     */
-    private $is_published;
 
     /**
      * @ORM\Column(type="string", length=255, nullable=true)
      */
-    private $image;
+    private $img;
+
 
     /**
      * @ORM\OneToMany(targetEntity=Post::class, mappedBy="category")
      */
     private $posts;
+
+    /**
+     * @ORM\Column(type="datetime")
+     */
+    private $created_at;
+
+    /**
+     * @ORM\Column(type="datetime")
+     */
+    private $updated_at;
+
+    /**
+     * @ORM\Column(type="boolean", nullable=true)
+     */
+    private $is_published;
+
+
 
     public function __construct()
     {
@@ -92,63 +99,22 @@ class Category
         return $this;
     }
 
-    public function getCreateAt(): ?\DateTimeImmutable
-    {
-        return $this->create_at;
-    }
 
-    public function setCreateAtValue()
-    {
-        $this->create_at = new \DateTime();
-    }
 
-    public function setCreateAt(\DateTimeImmutable $create_at): self
-    {
-        $this->create_at = $create_at;
-
-        return $this;
-    }
-
-    public function getUpdateAt(): ?\DateTimeImmutable
-    {
-        return $this->update_at;
-    }
-
-    public function setUpdateAtValue()
-    {
-        $this->update_at = new \DateTime();
-    }
-
-    public function setUpdateAt(\DateTimeImmutable $update_at): self
-    {
-        $this->update_at = $update_at;
-
-        return $this;
-    }
-
-    public function getIsPublished(): ?bool
-    {
-        return $this->is_published;
-    }
-
-    public function setIsPublished()
-    {
-        $this->is_published = self::PUBLISHED;
-    }
 
     public function setIsDraft()
     {
         $this->is_published = self::DRAFT;
     }
 
-    public function getImage(): ?string
+    public function getImg(): ?string
     {
-        return $this->image;
+        return $this->img;
     }
 
-    public function setImage(?string $image): self
+    public function setImg(?string $img): self
     {
-        $this->image = $image;
+        $this->img = $img;
 
         return $this;
     }
@@ -179,6 +145,54 @@ class Category
                 $post->setCategory(null);
             }
         }
+
+        return $this;
+    }
+
+    public function getCreatedAt(): ?\DateTimeInterface
+    {
+        return $this->created_at;
+    }
+
+    public function setCreatedAt(\DateTimeInterface $created_at): self
+    {
+        $this->created_at = $created_at;
+
+        return $this;
+    }
+
+    public function getUpdatedAt(): ?\DateTimeInterface
+    {
+        return $this->updated_at;
+    }
+
+    public function setUpdatedAt(\DateTimeInterface $updated_at): self
+    {
+        $this->updated_at = $updated_at;
+
+        return $this;
+    }
+
+    /**
+     * @ORM\PrePersist
+     * @ORM\PreUpdate
+     */
+    public function updatedTimestamps(): void
+    {
+        $this->setUpdatedAt(new \DateTime('now'));
+        if ($this->getCreatedAt() === null) {
+            $this->setCreatedAt(new \DateTime('now'));
+        }
+    }
+
+    public function getIsPublished(): ?bool
+    {
+        return $this->is_published;
+    }
+
+    public function setIsPublished(?bool $is_published): self
+    {
+        $this->is_published = $is_published;
 
         return $this;
     }

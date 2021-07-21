@@ -10,50 +10,34 @@ use Symfony\Component\HttpFoundation\File\UploadedFile;
 
 class FileManager implements FileManagerInterface
 {
-    private $userImgDirectory;
-    private $postImgDirectory;
-
-    public function __construct($userImgDirectory, $postImgDirectory)
-    {
-        $this->userImgDirectory = $userImgDirectory;
-        $this->postImgDirectory = $postImgDirectory;
-    }
-
     /**
-     * @param string $prefix
-     * @return string
-     */
-    public function getImageDirectory(string $storageDirName): string
-    {
-        $directoryProperty = $storageDirName . 'ImgDirectory';
-        return $this->$directoryProperty;
-    }
-
-    /**
+     * @param string $storageDir
      * @param UploadedFile $file
-     * @param string $storageDirName
      * @return string
+     * @throws \Exception
      */
-    public function imageUpload(UploadedFile $file, string  $storageDirName): string
+    public function upload(string  $storageDir, UploadedFile $file): string
     {
         $fileName = bin2hex(random_bytes(15)) . '.' . $file->guessExtension();
 
         try {
-            $file->move($this->getImageDirectory($storageDirName), $fileName);
+            $file->move($storageDir, $fileName);
         } catch (FileException $exception){
-            return $exception;
+            return $exception->getMessage();
         }
 
         return $fileName;
     }
 
     /**
-     * @inheritDoc
+     * @param string $storageDir
+     * @param string $fileName
+     * @return mixed|void
      */
-    public function removeImage(string $fileName, string  $storageDirName)
+    public function remove(string  $storageDir, string $fileName)
     {
         $fileSystem = new Filesystem();
-        $fileImage = $this->getImageDirectory($storageDirName) . $fileName;
+        $fileImage = $storageDir . $fileName;
         try {
             $fileSystem->remove($fileImage);
         } catch (FileException $exception){

@@ -60,6 +60,8 @@ class UserService
 
     private $form;
 
+    private $userImgDirectory;
+
     /**
      * UserService constructor.
      * @param FormFactoryInterface $formFactory
@@ -73,7 +75,8 @@ class UserService
         RouterInterface $router,
         FileManagerInterface $fileManagerService,
         TokenStorageInterface $tokenStorage,
-        RequestStack $requestStack
+        RequestStack $requestStack,
+        $userImgDirectory
     )
     {
         $this->passwordEncoder = $passwordEncoder;
@@ -84,6 +87,7 @@ class UserService
         $this->tokenStorage = $tokenStorage;
         $this->request = $requestStack->getMainRequest();
         $this->session = $this->request->getSession();
+        $this->userImgDirectory = $userImgDirectory;
 
     }
 
@@ -146,7 +150,7 @@ class UserService
     public function deleteImg(User $user): void
     {
         if (null !== $userImg = $user->getImg()){
-            $this->fm->removeImage($userImg, $user->getStorageDirName());
+            $this->fm->remove($this->userImgDirectory, $userImg);
         }
     }
 
@@ -155,12 +159,12 @@ class UserService
      * @param User $user
      * @return object
      */
-    public function saveUser(User $user): object
+    public function save(User $user): object
     {
         if (null !== $file = $this->form->get('img')->getData()){
             if ($file instanceof UploadedFile){
                 $this->deleteImg($user);
-                $user->setImg($this->fm->imageUpload($file, $user->getStorageDirName()));
+                $user->setImg($this->fm->upload($this->userImgDirectory, $file));
             }
         }
         if (!$user->getId()){
@@ -178,10 +182,10 @@ class UserService
      * @param int $id
      * @return Response
      */
-    public function deleteUser(int $id): Response
+    public function delete(int $id): Response
     {
         $currentUserOfSession = $this->tokenStorage->getToken()->getUser();
-        $user = $this->em->getRepository(User::class)->findOne($id);
+        $user = $this->em->getRepository(User::class)->find($id);
         if (!in_array('ROLE_SUPER', $currentUserOfSession->getRoles())) {
             $this->session->getFlashBag()->add('error', 'У вас нет прав на удаление пользователей');
         } elseif ($currentUserOfSession->getId() == $id) {

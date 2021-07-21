@@ -5,8 +5,10 @@
 # https://symfony.com/doc/current/best_practices.html#use-parameters-for-application-configuration
 parameters:
     img_user_directory: '%kernel.project_dir%\public\uploads\user\'
+    img_category_directory: '%kernel.project_dir%\public\uploads\category\'
     img_post_directory: '%kernel.project_dir%\public\uploads\post\'
     assets_img_user_path: '/uploads/user/'
+    assets_img_category_path: '/uploads/category/'
     assets_img_post_path: '/uploads/post/'
 
 services:
@@ -27,7 +29,12 @@ services:
 
     # add more service definitions when explicit configuration is needed
     # please note that last definitions always *replace* previous ones
-    App\Service\File\FileManager:
+    App\Service\User\UserService:
         arguments:
             $userImgDirectory: '%img_user_directory%'
-            $postImgDirectory: '%img_post_directory%'
+    App\Service\Category\CategoryService:
+        arguments:
+            $categoryImgDirectory: '%img_category_directory%'
+#    App\Service\Post\PostService:
+#        arguments:
+#            $postImgDirectory: '%img_post_directory%'

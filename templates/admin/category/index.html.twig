@@ -32,17 +32,26 @@
                         </button>
                     </div>
                 {% endfor %}
+                {% for message in app.flashes('success_create') %}
+                    <div class="alert alert-success alert-dismissible fade show" role="alert">
+                        {{ message }}
+                        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                {% endfor %}
             </div>
         </div>
         {% if(categories is not empty) %}
             <div class="row no-gutters">
                 <div class="col-12 mb-4">
-                    <table class="table table-hover border-bottom">
+                    <table class="table table-hover border-bottom text-center">
                         <thead>
                         <tr>
                             <th scope="col">#</th>
                             <th scope="col">Заголовок</th>
                             <th scope="col">Превью</th>
+                            <th scope="col">Опубликована</th>
                             <th scope="col">Действия</th>
                         </tr>
                         </thead>
@@ -51,9 +60,19 @@
                             <tr>
                                 <th scope="row">{{ category.id }}</th>
                                 <td>{{ category.title }}</td>
-                                <td>{% if category.image %}<img src="{{ category.image }}" alt="">{% endif %}</td>
-                                <td><a href="{{ path('admin_category_update', {'id': category.id}) }}"
-                                       class="bi bi-pencil-square"></a></td>
+                                <td>
+                                    {% if category.img is null%}
+                                    {% else %}
+                                        <img src="{{ assets_img_category_path }}{{ category.img }}" alt=""  width="100">
+                                    {% endif %}
+                                </td>
+
+                                <td>
+                                    {% if category.isPublished %}<a class="bi bi-check2-circle text-success"></a>{% else %}<a class="bi bi-x-circle text-danger"></a>{% endif %}
+                                </td>
+                                <td>
+                                    <a href="{{ path('admin_category_update', {'category_id': category.id}) }}" class="bi bi-pencil-square" title="Редактировать категорию"></a><a href="{{ path('admin_category_delete', {'category_id': category.id }) }}" class="bi bi-trash ml-3" title="Удалить Категорию"></a>
+                                </td>
                             </tr>
 
                         {% endfor %}

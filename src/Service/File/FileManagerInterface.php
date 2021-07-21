@@ -9,16 +9,16 @@ use Symfony\Component\HttpFoundation\File\UploadedFile;
 interface FileManagerInterface
 {
     /**
+     * @param string $storageDir
      * @param UploadedFile $file
-     * @param string $storageDirName
      * @return string
      */
-    public function imageUpload(UploadedFile $file, string $storageDirName): string;
+    public function upload(string $storageDir, UploadedFile $file): string;
 
     /**
+     * @param string $storageDir
      * @param string $fileName
-     * @param string $storageDirName
      * @return mixed
      */
-    public function removeImage(string $fileName, string  $storageDirName);
+    public function remove(string  $storageDir, string $fileName);
 }

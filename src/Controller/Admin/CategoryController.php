@@ -41,7 +41,7 @@ class CategoryController extends BaseController
     {
         $forRender = parent::renderDefault();
         $forRender['title'] = 'Категории';
-        $forRender['categories'] = $this->categoryRepository->getAllCategories();
+        $forRender['categories'] = $this->categoryRepository->findAll();
         if (!$forRender['categories']){
             $this->addFlash('error', 'В настоящий момент нет ни одной категории.');
         }
@@ -50,19 +50,15 @@ class CategoryController extends BaseController
 
     /**
      * @Route("/admin/category/create", name="admin_category_create")
-     * @param Request $request
-     * @param RedirectResponse|Response
+     * @return RedirectResponse|Response
      */
-    public function createAction(Request $request)
+    public function createAction()
     {
         $category = new Category();
-        $form = $this->createForm(CategoryType::class, $category);
-        $form->handleRequest($request);
-
+        $form = $this->categoryService->createForm($category);
         if ($form->isSubmitted() && $form->isValid())
         {
-            $this->categoryService->handleCreateCategory($category);
-            $this->addFlash('success', 'Категория добавлена');
+            $this->categoryService->save($category);
             return $this->redirectToRoute('admin_category');
         }
 
@@ -75,40 +71,24 @@ class CategoryController extends BaseController
     }
 
     /**
-     * @Route("/admin/category/update/{id}", name="admin_category_update")
-     * @param int $id
-     * @param Request $request
-     * @param RedirectResponse|Response
+     * @Route("/admin/category/update/{category_id}", name="admin_category_update")
+     * @param int $category_id
+     * @return RedirectResponse|Response
      */
-    public function updateAction(int $id, Request $request)
+    public function updateAction(int $category_id)
     {
-        $category = $this->categoryRepository->getOneCategory($id);
-        $form = $this->createForm(CategoryType::class, $category)
-            ->add('delete', SubmitType::class, [
-                'label' => 'Удалить',
-                'attr' => [
-                    'class' => 'btn btn-danger ml-3'
-                ]
-            ]);
-        $form->handleRequest($request);
+        $category = $this->categoryRepository->find($category_id);
+        $form = $this->categoryService->createForm($category);
 
         if ($form->isSubmitted() && $form->isValid())
         {
             if ($form->get('save')->isClicked())
             {
-                $this->categoryService->handleUpdateCategory($category);
-                $this->addFlash('success', 'Категория обновлена');
+                $this->categoryService->save($category);
             }
             if ($form->get('delete')->isClicked())
             {
-                $postRepository = $this->getDoctrine()->getManager()->getRepository(Post::class);
-                if (!$this->categoryRepository->getHavePostsCategory($postRepository, $category->getId())){
-                    $this->categoryService->handleDeleteCategory($category);
-                    $this->addFlash('error', 'Категория удалена');
-                }
-                else{
-                    $this->addFlash('error', 'Категория не пуста, и не может быть удалена');
-                }
+                return $this->deleteAction($category->getId());
 
             }
 
@@ -120,5 +100,15 @@ class CategoryController extends BaseController
 
         return $this->render('admin/category/form.html.twig', $forRender);
 
+    }
+
+    /**
+     * @Route("/admin/category/delete/{category_id}", name="admin_category_delete")
+     * @param int $category_id
+     * @return Response
+     */
+    public function deleteAction(int $category_id): Response
+    {
+        return $this->categoryService->delete($category_id);
     }
 }

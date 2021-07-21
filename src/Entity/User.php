@@ -62,11 +62,8 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 
     /**
      * @ORM\Column(type="string", length=255, nullable=true)
-     * @Assert\Image(mimeTypes={ "image/png", "image/jpeg", "image/gif" })
      */
     private $img;
-
-    private $storageDirName = 'user';
 
     public function __construct()
     {
@@ -240,10 +237,5 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         $this->img = $img;
 
         return $this;
-    }
-
-    public function getStorageDirName(): ?string
-    {
-        return $this->storageDirName;
     }
 }
