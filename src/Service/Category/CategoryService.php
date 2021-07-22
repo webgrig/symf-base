@@ -7,7 +7,6 @@ namespace App\Service\Category;
 use App\Entity\Category;
 use App\Entity\Post;
 use App\Form\CategoryType;
-use App\Repository\CategoryRepositoryInterface;
 use App\Service\File\FileManagerInterface;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Form\Form;
@@ -23,7 +22,7 @@ use Symfony\Component\Security\Core\User\UserInterface;
 class CategoryService
 {
     /**
-     * @var CategoryRepositoryInterface
+     * @var EntityManagerInterface
      */
     private $em;
 
@@ -43,9 +42,9 @@ class CategoryService
     private $router;
 
     /**
-     * @var string|\Stringable|UserInterface
+     * @var string|\Stringable|UserInterface|null
      */
-    private $tokenStorage;
+    private $currentUserOfSession = null;
 
     private $request;
 
@@ -75,10 +74,12 @@ class CategoryService
         $this->formFactory = $formFactory;
         $this->router = $router;
         $this->fm = $fileManagerService;
-        $this->tokenStorage = $tokenStorage;
         $this->request = $requestStack->getMainRequest();
         $this->session = $this->request->getSession();
         $this->categoryImgDirectory = $categoryImgDirectory;
+        if (null !== $tokenStorage->getToken()){
+            $this->currentUserOfSession = $tokenStorage->getToken()->getUser();
+        }
 
     }
 
@@ -102,7 +103,7 @@ class CategoryService
     {
        $categories =  $this->em->getRepository(Category::class)->findAll();
         if (!$categories){
-            $this->session->getFlashBag()->add('error', 'В настоящий момент нет ни одной категории.');
+            $this->session->getFlashBag()->add('error', 'В настоящий момент нет ни одной категории, создание постов невозможно.');
         }
         return $categories;
     }
@@ -131,9 +132,9 @@ class CategoryService
 
     /**
      * @param Category $category
-     * @return Category
+     * @return Category|string
      */
-    public function save(Category $category): object
+    public function save(Category $category): mixed
     {
         if (null !== $file = $this->form->get('img')->getData()){
             if ($file instanceof UploadedFile){
@@ -142,13 +143,20 @@ class CategoryService
             }
         }
         if (!$category->getId()){
-            $this->session->getFlashBag()->add('success_create', 'Категория создана');
+            $this->session->getFlashBag()->add('success', 'Категория создана');
         }
         else{
             $this->session->getFlashBag()->add('success', 'Изменения сохранены');
         }
         $this->em->persist($category);
-        $this->em->flush();
+
+        try {
+            $this->em->flush();
+        } catch (\Exception $e){
+            $this->deleteImg($category);
+            $this->session->getFlashBag()->add('error', $e->getMessage());
+            return $e->getMessage();
+        }
         return $category;
     }
 
@@ -158,9 +166,8 @@ class CategoryService
      */
     public function delete(int $id): Response
     {
-        $currentUserOfSession = $this->tokenStorage->getToken()->getUser();
         $postRepository = $this->em->getRepository(Post::class);
-        if (!in_array('ROLE_SUPER', $currentUserOfSession->getRoles())) {
+        if (!in_array('ROLE_SUPER', $this->currentUserOfSession->getRoles())) {
             $this->session->getFlashBag()->add('error', 'У вас нет прав на удаление категорий');
         }
         elseif ($this->em->getRepository(Category::class)->getHavePostsCategory($postRepository, $id)){

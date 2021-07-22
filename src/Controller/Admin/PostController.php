@@ -5,8 +5,8 @@ namespace App\Controller\Admin;
 
 
 use App\Entity\Post;
-use App\Repository\PostRepositoryInterface;
 use App\Service\Post\PostService;
+use App\Service\Category\CategoryService;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
@@ -18,20 +18,17 @@ use Symfony\Component\Routing\Annotation\Route;
  */
 class PostController extends BaseController
 {
-    private $postRepository;
-
     private $postService;
+    private $categoryService;
 
     /**
      * PostController constructor.
-     * @param PostRepositoryInterface $postRepository
      * @param PostService $postService
      */
-    public function __construct(PostRepositoryInterface $postRepository,
-                                PostService $postService)
+    public function __construct(PostService $postService, CategoryService $categoryService)
     {
-        $this->postRepository = $postRepository;
         $this->postService = $postService;
+        $this->categoryService = $categoryService;
     }
 
     /**
@@ -41,25 +38,20 @@ class PostController extends BaseController
     {
         $forRender = parent::renderDefault();
         $forRender['title'] = 'Посты';
-        $forRender['categories'] = $this->postRepository->findAll();
+        $forRender['posts'] = $this->postService->getAllEntities();
         return $this->render('admin/post/index.html.twig', $forRender);
     }
 
     /**
      * @Route("/admin/post/create", name="admin_post_create")
-     * @param Request $request
      * @param RedirectResponse|Response
      */
-    public function createAction(Request $request)
+    public function createAction()
     {
         $post = new Post();
-        $form = $this->createForm(PostType::class, $post);
-        $form->handleRequest($request);
-        if ($form->isSubmitted() && $form->isValid())
-        {
-            $file = $form->get('image')->getData();
-            $this->postService->handleCreatePost($form, $post);
-            $this->addFlash('success', 'Пост добавлен');
+        $form = $this->postService->createForm($post);
+        if ($form->isSubmitted() && $form->isValid()) {
+            $this->postService->save($post);
             return $this->redirectToRoute('admin_post');
         }
 
@@ -67,38 +59,30 @@ class PostController extends BaseController
         $forRender['title'] = 'Создание поста';
         $forRender['form'] = $form->createView();
 
+
         return $this->render('admin/post/form.html.twig', $forRender);
 
     }
 
-
-
     /**
-     * @Route("/admin/post/update/{id}", name="admin_post_update")
-     * @param int $id
-     * @param Request $request
+     * @Route("/admin/post/update/{post_id}", name="admin_post_update")
+     * @param int $post_id
      * @param RedirectResponse|Response
      *
      */
-    public function updateAction(int $id, Request $request)
+    public function updateAction(int $post_id)
     {
-        $post = $this->postRepository->getOnePost($id);
-        $form = $this->createForm(PostType::class, $post);
-        $form->handleRequest($request);
+        $post = $this->postService->getEntity($post_id);
+        $form = $this->postService->createForm($post);
 
-        if ($form->isSubmitted() && $form->isValid())
-        {
-            if ($form->get('save')->isClicked())
-            {
-                $file = $form->get('image')->getData();
-                $this->postRepository->setUpdatePost($post, $file);
-                $this->addFlash('success', 'Пост обновлен');
+        if ($form->isSubmitted() && $form->isValid()) {
+            if ($form->get('save')->isClicked()) {
+                $this->postService->save($post);
+            } elseif ($form->get('delete')->isSubmitted()) {
+                return $this->deleteAction($post->getId());
+
             }
-            if ($form->get('delete')->isClicked())
-            {
-                $this->postRepository->setDeletePost($post);
-                $this->addFlash('error', 'Пост удален');
-            }
+
             return $this->redirectToRoute('admin_post');
         }
 
@@ -108,5 +92,16 @@ class PostController extends BaseController
 
         return $this->render('admin/post/form.html.twig', $forRender);
 
+    }
+
+
+    /**
+     * @Route("/admin/post/delete/{post_id}", name="admin_post_delete")
+     * @param int $post_id
+     * @return Response
+     */
+    public function deleteAction(int $post_id): Response
+    {
+        return $this->postService->delete($post_id);
     }
 }

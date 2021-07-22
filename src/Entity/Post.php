@@ -3,9 +3,14 @@
 namespace App\Entity;
 
 use App\Repository\PostRepository;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Validator\Constraints as Assert;
+
 
 /**
+ * @ORM\HasLifecycleCallbacks()
  * @ORM\Entity(repositoryClass=PostRepository::class)
  */
 class Post
@@ -20,39 +25,51 @@ class Post
     private $id;
 
     /**
-     * @ORM\Column(type="string", length=1000)
-     */
-    private $title;
-
-    /**
      * @ORM\Column(type="text")
+     * @Assert\NotBlank()
      */
     private $content;
 
-    /**
-     * @ORM\Column(type="string", length=500, nullable=true)
-     */
-    private $image;
+
 
     /**
      * @ORM\Column(type="datetime")
      */
-    private $create_at;
+    private $created_at;
 
     /**
      * @ORM\Column(type="datetime")
      */
-    private $update_at;
+    private $updated_at;
 
     /**
-     * @ORM\Column(type="boolean")
+     * @ORM\Column(type="string", length=255, nullable=true)
      */
-    private $is_published;
+    private $img;
 
     /**
-     * @ORM\ManyToOne(targetEntity=Category::class, inversedBy="posts")
+     * @ORM\ManyToMany(targetEntity=Category::class, inversedBy="posts")
      */
-    private $category;
+    private $categories;
+
+    /**
+     * @ORM\Column(type="boolean", nullable=true)
+     */
+    private $is_published = true;
+
+    /**
+     * @ORM\Column(type="string", length=255, nullable=true)
+     * @Assert\NotBlank
+     */
+    private $title;
+
+
+
+
+    public function __construct()
+    {
+        $this->categories = new ArrayCollection();
+    }
 
 
     public function getId(): ?int
@@ -60,17 +77,6 @@ class Post
         return $this->id;
     }
 
-    public function getTitle(): ?string
-    {
-        return $this->title;
-    }
-
-    public function setTitle(string $title): self
-    {
-        $this->title = $title;
-
-        return $this;
-    }
 
     public function getContent(): ?string
     {
@@ -84,60 +90,16 @@ class Post
         return $this;
     }
 
-    public function getImage(): ?string
-    {
-        return $this->image;
-    }
-
-    public function setImage(?string $image): self
-    {
-        $this->image = $image;
-
-        return $this;
-    }
-
-    public function getCreateAt(): ?\DateTimeImmutable
-    {
-        return $this->create_at;
-    }
-
-    public function setCreateAtValue()
-    {
-        $this->create_at = new \DateTime();
-    }
-
-    public function setCreateAt(\DateTimeImmutable $create_at): self
-    {
-        $this->create_at = $create_at;
-
-        return $this;
-    }
-
-    public function getUpdateAt(): ?\DateTimeImmutable
-    {
-        return $this->update_at;
-    }
-
-    public function setUpdateAtValue()
-    {
-        $this->update_at = new \DateTime();
-    }
-
-    public function setUpdateAt(\DateTimeImmutable $update_at): self
-    {
-        $this->update_at = $update_at;
-
-        return $this;
-    }
-
     public function getIsPublished(): ?bool
     {
         return $this->is_published;
     }
 
-    public function setIsPublished()
+    public function setIsPublished(?bool $is_published): self
     {
-        $this->is_published = self::PUBLISHED;
+        $this->is_published = $is_published;
+
+        return $this;
     }
 
     public function setIsDraft()
@@ -145,15 +107,76 @@ class Post
         $this->is_published = self::DRAFT;
     }
 
-    public function getCategory(): ?Category
+    public function getCreatedAt(): ?\DateTimeInterface
     {
-        return $this->category;
+        return $this->created_at;
     }
 
-    public function setCategory(Category $category): self
+    public function setCreatedAt(\DateTimeInterface $created_at): self
     {
-        $this->category = $category;
+        $this->created_at = $created_at;
 
         return $this;
     }
+
+    /**
+     * @ORM\PrePersist
+     * @ORM\PreUpdate
+     */
+    public function updatedTimestamps(): void
+    {
+        $this->setUpdatedAt(new \DateTime('now'));
+        if ($this->getCreatedAt() === null) {
+            $this->setCreatedAt(new \DateTime('now'));
+        }
+    }
+
+    public function getImg(): ?string
+    {
+        return $this->img;
+    }
+
+    public function setImg(?string $img): self
+    {
+        $this->img = $img;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection|Category[]
+     */
+    public function getCategories(): Collection
+    {
+        return $this->categories;
+    }
+
+    public function addCategory(Category $category): self
+    {
+        if (!$this->categories->contains($category)) {
+            $this->categories[] = $category;
+        }
+
+        return $this;
+    }
+
+    public function removeCategory(Category $category): self
+    {
+        $this->categories->removeElement($category);
+
+        return $this;
+    }
+
+    public function getTitle(): ?string
+    {
+        return $this->title;
+    }
+
+    public function setTitle(?string $title): self
+    {
+        $this->title = $title;
+
+        return $this;
+    }
+
 }

@@ -4,7 +4,7 @@ namespace App\Form;
 
 use App\Entity\Role;
 use App\Entity\User;
-use App\Form\EventListener\User\UserSubscriber;
+use App\Form\EventListener\UserSubscriber;
 use App\Repository\UserRepositoryInterface;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
@@ -47,7 +47,8 @@ class UserType extends AbstractType
             ->add('img', FileType::class, [
                 'label' => 'Аватар',
                 'required' => false,
-                'mapped' => false,'constraints' => [
+                'mapped' => false,
+                'constraints' => [
                     new File([
                         'maxSize' => '1024k',
                         'mimeTypes' => [

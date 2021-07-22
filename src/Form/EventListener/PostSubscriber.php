@@ -1,17 +1,15 @@
 <?php
 
 
-namespace App\Form\EventListener\User;
+namespace App\Form\EventListener;
 
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use Symfony\Component\Form\Extension\Core\Type\ButtonType;
-use Symfony\Component\Form\Extension\Core\Type\PasswordType;
-use Symfony\Component\Form\Extension\Core\Type\RepeatedType;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\Form\FormEvent;
 use Symfony\Component\Form\FormEvents;
 
-class UserSubscriber implements EventSubscriberInterface
+class PostSubscriber implements EventSubscriberInterface
 {
     public static function getSubscribedEvents(): array
     {
@@ -22,9 +20,9 @@ class UserSubscriber implements EventSubscriberInterface
 
     public function preSetData(FormEvent $event): void
     {
-        $user = $event->getData();
+        $post = $event->getData();
         $form = $event->getForm();
-        if (null !== $user->getId()) {
+        if (null !== $post->getId()) {
             $form
 
                 ->add('save', SubmitType::class, [
@@ -36,25 +34,15 @@ class UserSubscriber implements EventSubscriberInterface
                         'class' => 'btn btn-primary mt-3 mb-3'
                     ]
                 ])
+
                 ->add('delete', ButtonType::class, [
                     'label' => 'Удалить',
                     'attr' => [
                         'class' => 'btn btn-danger ml-3 mt-3 mb-3',
                         'data-toggle' => 'modal',
                         'data-target' => '#confirmModal',
-                        'data-entity-id' => $user->getId(),
-                        'data-href' => '/admin/user/delete/' . $user->getId(),
-                    ]
-                ])
-                ->add('plainPassword', RepeatedType::class, [
-                    'type' => PasswordType::class,
-                    'required' => false,
-                    'mapped' => false,
-                    'first_options' => [
-                        'label' => 'Пароль',
-                    ],
-                    'second_options' => [
-                        'label' => 'Подтвердить пароль',
+                        'data-entity-id' => $post->getId(),
+                        'data-href' => '/admin/post/delete/' . $post->getId(),
                     ]
                 ])
             ;

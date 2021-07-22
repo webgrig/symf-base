@@ -35,6 +35,6 @@ services:
     App\Service\Category\CategoryService:
         arguments:
             $categoryImgDirectory: '%img_category_directory%'
-#    App\Service\Post\PostService:
-#        arguments:
-#            $postImgDirectory: '%img_post_directory%'
+    App\Service\Post\PostService:
+        arguments:
+            $postImgDirectory: '%img_post_directory%'

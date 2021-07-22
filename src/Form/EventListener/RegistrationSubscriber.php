@@ -1,7 +1,7 @@
 <?php
 
 
-namespace App\Form\EventListener\Registration;
+namespace App\Form\EventListener;
 
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use Symfony\Component\Form\Extension\Core\Type\CheckboxType;

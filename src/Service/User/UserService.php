@@ -24,7 +24,7 @@ use Symfony\Component\Security\Core\User\UserInterface;
 class UserService
 {
     /**
-     * @var UserRepositoryInterface
+     * @var EntityManagerInterface
      */
     private $em;
 
@@ -50,7 +50,7 @@ class UserService
     private $router;
 
     /**
-     * @var string|\Stringable|UserInterface
+     * @var string|\Stringable|UserInterface|null
      */
     private $currentUserOfSession = null;
 
@@ -181,9 +181,9 @@ class UserService
 
     /**
      * @param User $user
-     * @return object
+     * @return object|string
      */
-    public function save(User $user): object
+    public function save(User $user): mixed
     {
         if (null !== $file = $this->form->get('img')->getData()){
             if ($file instanceof UploadedFile){
@@ -198,7 +198,13 @@ class UserService
             $this->session->getFlashBag()->add('success', 'Изменения сохранены');
         }
         $this->em->persist($user);
-        $this->em->flush();
+        try {
+            $this->em->flush();
+        } catch (\Exception $e){
+            $this->deleteImg($user);
+            $this->session->getFlashBag()->add('error', $e->getMessage());
+            return $e->getMessage();
+        }
         return $user;
     }
 
