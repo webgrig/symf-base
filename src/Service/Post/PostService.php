@@ -4,8 +4,10 @@
 namespace App\Service\Post;
 
 
+use App\Entity\Category;
 use App\Entity\Post;
 use App\Form\PostType;
+use App\Service\Category\CategoryService;
 use App\Service\File\FileManagerInterface;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Form\Form;
@@ -53,6 +55,8 @@ class PostService
 
     private $postImgDirectory;
 
+    private $categoryService;
+
     /**
      * PostService constructor.
      * @param FormFactoryInterface $formFactory
@@ -65,6 +69,7 @@ class PostService
         FileManagerInterface $fileManagerService,
         TokenStorageInterface $tokenStorage,
         RequestStack $requestStack,
+        CategoryService $categoryService,
         $postImgDirectory
 
     )
@@ -79,6 +84,7 @@ class PostService
         if (null !== $tokenStorage->getToken()){
             $this->currentUserOfSession = $tokenStorage->getToken()->getUser();
         }
+        $this->categoryService = $categoryService;
 
     }
 
@@ -100,7 +106,10 @@ class PostService
      */
     public function getAllEntities(): array
     {
-        return  $this->em->getRepository(Post::class)->findAll();
+        $this->categoryService->countAvailableEntities();
+
+        return $this->em->getRepository(Post::class)->findAll();
+
     }
 
     /**

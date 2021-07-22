@@ -101,11 +101,22 @@ class CategoryService
      */
     public function getAllEntities(): array
     {
-       $categories =  $this->em->getRepository(Category::class)->findAll();
-        if (!$categories){
-            $this->session->getFlashBag()->add('error', 'В настоящий момент нет ни одной категории, создание постов невозможно.');
+        if (!$categories = $this->em->getRepository(Category::class)->findAll()){
+            $this->session->getFlashBag()->add('error', 'В настоящий момент нет ни одной категории.');
         }
         return $categories;
+    }
+
+    /**
+     * @return int
+     */
+    public function countAvailableEntities(): int
+    {
+        $amountAvailableCategories = $this->em->getRepository(Category::class)->countAvailableCategories();
+        if (!$amountAvailableCategories){
+            $this->session->getFlashBag()->add('error-available-categories', 'В настоящий момент нет ни одной доступной категории, создание постов невозможно.');;
+        }
+        return $amountAvailableCategories;
     }
 
     /**
@@ -166,11 +177,10 @@ class CategoryService
      */
     public function delete(int $id): Response
     {
-        $postRepository = $this->em->getRepository(Post::class);
         if (!in_array('ROLE_SUPER', $this->currentUserOfSession->getRoles())) {
             $this->session->getFlashBag()->add('error', 'У вас нет прав на удаление категорий');
         }
-        elseif ($this->em->getRepository(Category::class)->getHavePostsCategory($postRepository, $id)){
+        elseif ($this->em->getRepository(Category::class)->findOneBy(['id' => $id])->getPosts()[0]){
             $this->session->getFlashBag()->add('error', 'Категория не пуста, и не может быть удалена');
         } else {
             $category = $this->em->getRepository(Category::class)->find($id);

@@ -19,16 +19,14 @@ use Symfony\Component\Routing\Annotation\Route;
 class PostController extends BaseController
 {
     private $postService;
-    private $categoryService;
 
     /**
      * PostController constructor.
      * @param PostService $postService
      */
-    public function __construct(PostService $postService, CategoryService $categoryService)
+    public function __construct(PostService $postService)
     {
         $this->postService = $postService;
-        $this->categoryService = $categoryService;
     }
 
     /**

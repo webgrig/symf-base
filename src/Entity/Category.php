@@ -27,13 +27,13 @@ class Category
 
     /**
      * @ORM\Column(type="string", length=255)
-     * @Assert\NotBlank()
+     * @Assert\NotBlank
      */
     private $title;
 
     /**
      * @ORM\Column(type="text", nullable=true)
-     * @Assert\NotBlank()
+     * @Assert\NotBlank
      */
     private $description;
 
@@ -61,6 +61,7 @@ class Category
 
     /**
      * @ORM\ManyToMany(targetEntity=Post::class, mappedBy="categories")
+     * @Assert\Valid
      */
     private $posts;
 
@@ -68,6 +69,8 @@ class Category
     {
         $this->posts = new ArrayCollection();
     }
+
+
 
 
     public function getId(): ?int
@@ -99,9 +102,6 @@ class Category
         return $this;
     }
 
-
-
-
     public function setIsDraft()
     {
         $this->is_published = self::DRAFT;
@@ -118,7 +118,6 @@ class Category
 
         return $this;
     }
-
 
 
     public function getCreatedAt(): ?\DateTimeInterface
@@ -195,4 +194,5 @@ class Category
 
         return $this;
     }
+
 }

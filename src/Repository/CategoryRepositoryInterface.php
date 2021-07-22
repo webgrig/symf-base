@@ -43,11 +43,5 @@ interface CategoryRepositoryInterface
      */
     public function setDeleteCategory(Category $category);
 
-    /**
-     * @param PostRepository $postRepository
-     * @param int $categoryId
-     * @return bool
-     */
-    public function getHavePostsCategory(PostRepository $postRepository, int $categoryId): bool;
 
 }

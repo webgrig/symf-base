@@ -7,11 +7,16 @@
                 <h1 class="display-4 text-center mt-5">{{ title }}</h1>
             </div>
         </div>
-        {% if(posts is empty) %}
+        {% set errorMessages = app.session.getFlashBag().get('error-available-categories')|default(false) %}
+        {% if errorMessages %}
             <div class="row no-gutters justify-content-center">
                 <div class="col-8">
                     <div class="alert alert-danger fade show" role="alert">
-                        {{ app.flashes('error')[0] }}
+                        {% for message in errorMessages %}
+                            {{ message }}
+                        {% endfor %}
+{#                        {{ app.flashes('error') }}#}
+{#                        {{ app.session.getFlashBag().get('error') }}#}
                         <hr>
                         <div class="text-right mt-3">
                             <a href="{{ path('admin_category_create') }}">Создать категорию</a>
@@ -83,7 +88,11 @@
                                     </td>
                                     <td>{{ post.title }}</td>
                                     <td>{{ post.content }}</td>
-                                    <td></td>
+                                    <td>
+                                        {% for category in post.categories %}
+                                            {{ category.title }}
+                                        {% endfor %}
+                                    </td>
                                     <td>
                                         {% if post.isPublished %}<a
                                                 class="bi bi-check2-circle text-success"></a>{% else %}<a

@@ -48,11 +48,6 @@ class Post
     private $img;
 
     /**
-     * @ORM\ManyToMany(targetEntity=Category::class, inversedBy="posts")
-     */
-    private $categories;
-
-    /**
      * @ORM\Column(type="boolean", nullable=true)
      */
     private $is_published = true;
@@ -63,13 +58,19 @@ class Post
      */
     private $title;
 
-
-
+    /**
+     * @ORM\ManyToMany(targetEntity=Category::class, inversedBy="posts")
+     * @Assert\Valid
+     */
+    private $categories;
 
     public function __construct()
     {
         $this->categories = new ArrayCollection();
     }
+
+
+
 
 
     public function getId(): ?int
@@ -119,6 +120,18 @@ class Post
         return $this;
     }
 
+    public function getUpdatedAt(): ?\DateTimeInterface
+    {
+        return $this->updated_at;
+    }
+
+    public function setUpdatedAt(\DateTimeInterface $updated_at): self
+    {
+        $this->updated_at = $updated_at;
+
+        return $this;
+    }
+
     /**
      * @ORM\PrePersist
      * @ORM\PreUpdate
@@ -139,6 +152,18 @@ class Post
     public function setImg(?string $img): self
     {
         $this->img = $img;
+
+        return $this;
+    }
+
+    public function getTitle(): ?string
+    {
+        return $this->title;
+    }
+
+    public function setTitle(?string $title): self
+    {
+        $this->title = $title;
 
         return $this;
     }
@@ -167,16 +192,5 @@ class Post
         return $this;
     }
 
-    public function getTitle(): ?string
-    {
-        return $this->title;
-    }
-
-    public function setTitle(?string $title): self
-    {
-        $this->title = $title;
-
-        return $this;
-    }
 
 }

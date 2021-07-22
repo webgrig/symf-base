@@ -83,14 +83,18 @@ class CategoryRepository extends ServiceEntityRepository implements CategoryRepo
     }
 
     /**
-     * @param PostRepository $postRepository
-     * @param int $categoryId
-     * @return bool
+     * @return int
      */
-
-    public function getHavePostsCategory(PostRepository $postRepository, int $categoryId): bool
+    public function countAvailableCategories(): int
     {
-        return $postRepository->findOneBy(['category' => $categoryId]) ? true : false;
+        return $this->createQueryBuilder('c')
+            ->select('count(c.id)')
+            ->andWhere('c.is_published = :val')
+            ->setParameter('val', true)
+            ->getQuery()
+            ->getSingleScalarResult()
+            ;
     }
+
 
 }

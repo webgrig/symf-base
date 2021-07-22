@@ -17,7 +17,10 @@
         <div class="row no-gutters justify-content-center">
             <div class="col-8">
                 <div class="alert alert-danger fade show" role="alert">
-                    {{ app.flashes('error')[0] }}
+                    {% for message in app.flashes('error') %}
+                        {{ message }}
+                    {% endfor %}
+{#                    {{ app.flashes('error') }}#}
                 </div>
             </div>
         </div>
