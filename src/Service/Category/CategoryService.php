@@ -5,7 +5,6 @@ namespace App\Service\Category;
 
 
 use App\Entity\Category;
-use App\Entity\Post;
 use App\Form\CategoryType;
 use App\Service\File\FileManagerInterface;
 use Doctrine\ORM\EntityManagerInterface;
@@ -19,7 +18,7 @@ use Symfony\Component\Routing\RouterInterface;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Security\Core\User\UserInterface;
 
-class CategoryService
+class CategoryService implements CategoryServiceInterface
 {
     /**
      * @var EntityManagerInterface
@@ -145,7 +144,7 @@ class CategoryService
      * @param Category $category
      * @return Category|string
      */
-    public function save(Category $category): mixed
+    public function save(Category $category)
     {
         if (null !== $file = $this->form->get('img')->getData()){
             if ($file instanceof UploadedFile){
@@ -168,7 +167,7 @@ class CategoryService
             $this->session->getFlashBag()->add('error', $e->getMessage());
             return $e->getMessage();
         }
-        return $category;
+        return $this;
     }
 
     /**

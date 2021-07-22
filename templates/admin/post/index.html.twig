@@ -54,7 +54,7 @@
             </div>
             <div class="row no-gutters">
                 <div class="col-12 mb-4">
-                    <table class="table table-hover border-bottom">
+                    <table class="table table-hover border-bottom text-center">
                         <thead>
                         <tr>
                             <th scope="col" class="w-2">#</th>
@@ -69,11 +69,12 @@
                         <tbody>
                         {% if(posts is empty) %}
                             <tr>
-                                <td colspan="7" class="text-center">
+                                <td colspan="7">
                                     <span class="text-black-50">Постов нет!</span>
                                 </td>
                             </tr>
                         {% else %}
+
                             {% for post in posts %}
                                 <tr>
                                     <td scope="row">{{ post.id }}</td>
@@ -89,8 +90,15 @@
                                     <td>{{ post.title }}</td>
                                     <td>{{ post.content }}</td>
                                     <td>
+
                                         {% for category in post.categories %}
-                                            {{ category.title }}
+                                            <div class="d-flex justify-content-center">
+                                                <div class="w-50 text-right pr-1">{{ category.title }}</div>
+                                                <div class="w-25 text-left pl-1">{% if category.isPublished %} <a
+                                                            class="bi bi-check2-circle text-success"></a>{% else %}<a
+                                                            class="bi bi-x-circle text-danger"></a>{% endif %}</div>
+
+                                            </div>
                                         {% endfor %}
                                     </td>
                                     <td>
@@ -100,12 +108,12 @@
                                     </td>
                                     <td><a href="{{ path('admin_post_update', {'post_id': post.id}) }}"
                                            class="bi bi-pencil-square" title="Редактировать пост"></a><a href="#"
-                                                                              data-href="{{ path('admin_post_delete', {'post_id': post.id}) }}"
-                                                                              data-toggle="modal"
-                                                                              data-target="#confirmModal"
-                                                                              data-entity-id="{{ post.id }}"
-                                                                              class="bi bi-trash ml-3"
-                                                                              title="Удалить пост"></a></td>
+                                                                                                         data-href="{{ path('admin_post_delete', {'post_id': post.id}) }}"
+                                                                                                         data-toggle="modal"
+                                                                                                         data-target="#confirmModal"
+                                                                                                         data-entity-id="{{ post.id }}"
+                                                                                                         class="bi bi-trash ml-3"
+                                                                                                         title="Удалить пост"></a></td>
                                 </tr>
 
                             {% endfor %}

@@ -37,9 +37,9 @@ class FileManager implements FileManagerInterface
     public function remove(string  $storageDir, string $fileName)
     {
         $fileSystem = new Filesystem();
-        $fileImage = $storageDir . $fileName;
+        $file = $storageDir . $fileName;
         try {
-            $fileSystem->remove($fileImage);
+            $fileSystem->remove($file);
         } catch (FileException $exception){
             echo $exception->getMessage();
         }

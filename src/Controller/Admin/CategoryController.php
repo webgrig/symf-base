@@ -5,6 +5,7 @@ namespace App\Controller\Admin;
 
 use App\Entity\Category;
 use App\Service\Category\CategoryService;
+use App\Service\Category\CategoryServiceInterface;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
@@ -19,9 +20,9 @@ class CategoryController extends BaseController
 
     /**
      * CategoryController constructor.
-     * @param CategoryService $categoryService
+     * @param CategoryServiceInterface $categoryService
      */
-    public function __construct(CategoryService $categoryService)
+    public function __construct(CategoryServiceInterface $categoryService)
     {
         $this->categoryService =  $categoryService;
     }

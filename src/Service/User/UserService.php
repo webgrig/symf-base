@@ -21,7 +21,7 @@ use Symfony\Component\Routing\RouterInterface;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Security\Core\User\UserInterface;
 
-class UserService
+class UserService implements UserServiceInterface
 {
     /**
      * @var EntityManagerInterface
@@ -181,9 +181,9 @@ class UserService
 
     /**
      * @param User $user
-     * @return object|string
+     * @return UserServiceInterface|string
      */
-    public function save(User $user): mixed
+    public function save(User $user)
     {
         if (null !== $file = $this->form->get('img')->getData()){
             if ($file instanceof UploadedFile){
@@ -205,7 +205,7 @@ class UserService
             $this->session->getFlashBag()->add('error', $e->getMessage());
             return $e->getMessage();
         }
-        return $user;
+        return $this;
     }
 
     public function getCratedEntityId()

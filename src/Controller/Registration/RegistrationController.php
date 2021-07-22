@@ -8,6 +8,7 @@ use App\Repository\UserRepository;
 use App\Repository\UserRepositoryInterface;
 use App\Security\EmailVerifier;
 use App\Service\User\UserService;
+use App\Service\User\UserServiceInterface;
 use Symfony\Bridge\Twig\Mime\TemplatedEmail;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -22,11 +23,11 @@ class RegistrationController extends AbstractController
     private $emailVerifier;
 
     /**
-     * @var UserService
+     * @var UserServiceInterface
      */
     private $userService;
 
-    public function __construct(EmailVerifier $emailVerifier, UserService $userService)
+    public function __construct(EmailVerifier $emailVerifier, UserServiceInterface $userService)
     {
         $this->emailVerifier = $emailVerifier;
         $this->userService = $userService;

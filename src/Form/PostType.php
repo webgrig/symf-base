@@ -52,6 +52,8 @@ class PostType extends AbstractType
                     'label' => 'Категории',
                     'class' => Category::class,
                     'choice_label' => 'title',
+                    'choices' => $options['categories'],
+//                    'placeholder' => 'Выбрать категорию',
                     'multiple' => true,
 //                    'error_bubbling' => true
                 ]
@@ -81,6 +83,7 @@ class PostType extends AbstractType
     {
         $resolver->setDefaults([
             'data_class' => Post::class,
+            'categories' => NULL,
         ]);
     }
 }

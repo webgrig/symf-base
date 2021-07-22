@@ -96,5 +96,14 @@ class CategoryRepository extends ServiceEntityRepository implements CategoryRepo
             ;
     }
 
+    public function getAvailableCategoriesWithPosts()
+    {
+        return $this->createQueryBuilder('c')
+            ->setParameter('val', true)
+            ->leftJoin('c.posts', 'posts')
+            ->getQuery()
+            ->getResult()
+            ;
+    }
 
 }

@@ -3,11 +3,10 @@
 
 namespace App\Service\Post;
 
-
 use App\Entity\Category;
 use App\Entity\Post;
 use App\Form\PostType;
-use App\Service\Category\CategoryService;
+use App\Service\Category\CategoryServiceInterface;
 use App\Service\File\FileManagerInterface;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Form\Form;
@@ -20,7 +19,7 @@ use Symfony\Component\Routing\RouterInterface;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Security\Core\User\UserInterface;
 
-class PostService
+class PostService implements PostServiceInterface
 {
     /**
      * @var EntityManagerInterface
@@ -69,7 +68,7 @@ class PostService
         FileManagerInterface $fileManagerService,
         TokenStorageInterface $tokenStorage,
         RequestStack $requestStack,
-        CategoryService $categoryService,
+        CategoryServiceInterface $categoryService,
         $postImgDirectory
 
     )
@@ -95,21 +94,23 @@ class PostService
 
     public function createForm(Post $post): object
     {
-        $this->form = $this->formFactory->create(PostType::class, $post);
+        $categories = $this->em->getRepository(Category::class)->findAll();
+        $this->form = $this->formFactory->create(PostType::class, $post, ['categories' => $categories]);
         $this->form->handleRequest($this->request);
 
         return $this->form;
     }
 
     /**
-     * @return array
+     * @return Post[]|mixed|object[]|RedirectResponse
      */
-    public function getAllEntities(): array
+    public function getAll()
     {
-        $this->categoryService->countAvailableEntities();
+        if (!$this->categoryService->countAvailableEntities()){
+            return new RedirectResponse($this->router->generate('admin_post'));
+        }
 
         return $this->em->getRepository(Post::class)->findAll();
-
     }
 
     /**
@@ -136,9 +137,9 @@ class PostService
 
     /**
      * @param Post $post
-     * @return Post|string
+     * @return PostServiceInterface|string
      */
-    public function save(Post $post): mixed
+    public function save(Post $post)
     {
         if (null !== $file = $this->form->get('img')->getData()){
             if ($file instanceof UploadedFile){
@@ -160,7 +161,7 @@ class PostService
             $this->session->getFlashBag()->add('error', $e->getMessage());
             return $e->getMessage();
         }
-        return $post;
+        return $this;
     }
 
     /**
