@@ -47,4 +47,20 @@ class PostRepository extends ServiceEntityRepository implements PostRepositoryIn
     {
         return $this->em->getRepository(Category::class)->countAvailableCategories();
     }
+
+    /**
+     * @return Post[]
+     */
+    public function getAllPublished(): array
+    {
+        return $this->createQueryBuilder('p')
+//            ->select('p.id', 'p.content', 'p.title', 'p.img', 'pc.title as titleCategory')
+            ->andWhere('p.is_published = :pp_val')
+            ->setParameter('pp_val', true)
+//            ->leftJoin('p.categories', 'pc')
+            ->orderBy('p.updated_at', 'DESC')
+            ->getQuery()
+            ->getResult()
+            ;
+    }
 }

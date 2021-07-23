@@ -1,20 +1,36 @@
 {% extends 'base.html.twig' %}
 {% block title %}{{ title }}{% endblock %}
 {% block body %}
-    <div class="container-fluid">
-        <div class="row no-gutters justify-content-center mt-5">
-            <div class="col-12 col-lg-6 col-md-6">
-                <h1 class="display-4 text-center">{{ title }}</h1>
+    <div class="container-fluid mt-3 mb-3">
+        <div class="row no-gutters">
+            <div class="col-12 post-container">
+                <div class="row no-gutters">
+                    {% for post in posts %}
+                        <div class="col-4 p-2">
+                            <div class="card text-center">
+                                {% if post.img is not null %}
+                                    <img class="card-img-top" src="{{ asset('uploads/post/') }}{{ post.img }}" alt="{{ post.title }}">
+                                {% else %}
+                                    <img class="card-img-top" src="{{ asset('uploads/post/no_image.jpg') }}" alt="{{ post.title }}">
+                                {% endif %}
+                                <div class="card-body">
+                                    {% for category in post.categories %}
+                                        {% if category.isPublished %}
+                                            <h6 class="text-muted">{{ category.title }}</h6>
+                                        {% endif %}
+                                    {% endfor %}
+                                    <h5 class="card-title">{{ post.title }}</h5>
+                                    <p class="card-text">{{ post.content }}</p>
+                                    <a href="#" class="btn btn-primary">Читать больше</a>
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
             </div>
         </div>
     </div>
 
-    <div ref="words" data-words="{{ words|join(',') }}">
 
-    </div>
-
-    <div id="app">
-        <app></app>
-    </div>
 
 {% endblock %}

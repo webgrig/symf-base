@@ -35,7 +35,7 @@ class PostType extends AbstractType
                 'mapped' => false,
                 'constraints' => [
                     new File([
-                        'maxSize' => '1024k',
+                        'maxSize' => '2000k',
                         'mimeTypes' => [
                             'image/png',
                             'image/jpeg',

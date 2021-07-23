@@ -26,4 +26,6 @@ interface PostRepositoryInterface
      * @return bool
      */
     public function countAvailableCategories(): bool;
+
+
 }
