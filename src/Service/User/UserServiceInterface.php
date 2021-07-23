@@ -18,7 +18,7 @@ interface UserServiceInterface
     /**
      * @return array
      */
-    public function getAllEntities(): array;
+    public function getAll(): array;
 
     /**
      * @param int $id
@@ -39,12 +39,18 @@ interface UserServiceInterface
 
     /**
      * @param User $user
+     * @return User
+     */
+    public function saveImg(User $user);
+
+    /**
+     * @param User $user
      */
     public function deleteImg(User $user): void;
 
     /**
      * @param User $user
-     * @return $this|string
+     * @return $this
      */
     public function save(User $user);
 

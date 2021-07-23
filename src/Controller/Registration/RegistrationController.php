@@ -82,10 +82,10 @@ class RegistrationController extends AbstractController
     /**
      * @Route("/register/send-confirmation/{id}/{force?}", name="send-confirmation")
      * @param Request $request
-     * @param UserRepository $userRepository
+     * @param UserRepositoryInterface $userRepository
      * @return Response
      */
-    public function sendConfirmation(Request $request, UserRepository $userRepository): Response
+    public function sendConfirmation(Request $request, UserRepositoryInterface $userRepository): Response
     {
 
         $id = $request->get('id');
@@ -124,7 +124,7 @@ class RegistrationController extends AbstractController
     /**
      * @Route("/verify/email", name="app_verify_email")
      */
-    public function verifyUserEmail(Request $request, UserRepository $userRepository): Response
+    public function verifyUserEmail(Request $request, UserRepositoryInterface $userRepository): Response
     {
         $id = $request->get('id');
 

@@ -5,7 +5,6 @@ namespace App\Form;
 use App\Entity\Role;
 use App\Entity\User;
 use App\Form\EventListener\UserSubscriber;
-use App\Repository\UserRepositoryInterface;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\AbstractType;
@@ -26,7 +25,7 @@ class UserType extends AbstractType
 {
 
     /**
-     * @var UserRepositoryInterface
+     * @var UserRepository
      */
     private $entityManager;
 

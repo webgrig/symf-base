@@ -3,7 +3,6 @@
 namespace App\Repository;
 
 use App\Entity\Category;
-use App\Entity\Post;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\Persistence\ManagerRegistry;
@@ -14,96 +13,48 @@ use Doctrine\Persistence\ManagerRegistry;
  * @method Category[]    findAll()
  * @method Category[]    findBy(array $criteria, array $orderBy = null, $limit = null, $offset = null)
  */
+
 class CategoryRepository extends ServiceEntityRepository implements CategoryRepositoryInterface
 {
-    private $manager;
+    private $em;
+
     public function __construct(ManagerRegistry $registry, EntityManagerInterface $manager)
     {
-        $this->manager = $manager;
+        $this->em = $manager;
         parent::__construct($registry, Category::class);
     }
 
     /**
-     * @return array
+     * Get all categories sorted by last modified date
+     *
+     * @return Category[]
      */
-    public function getAllCategories(): array
-    {
-        return parent::findAll();
-    }
-
-    /**
-     * @param int $categoryId
-     * @return Category
-     */
-    public function getOneCategory(int $categoryId): object
-    {
-        return parent::find($categoryId);
-    }
-
-    /**
-     * @param Category $category
-     * @return object
-     */
-    public function setCreateCategory(Category $category): object
-    {
-        $this->manager->persist($category);
-        $this->manager->flush();
-        return $this;
-    }
-
-
-    /**
-     * @param Category $category
-     * @return object
-     */
-    public function setSaveCategory(Category $category): object
-    {
-        $this->manager->flush();
-        return $this;
-    }
-
-    /**
-     * @param Category $category
-     * @return object
-     */
-    public function setUpdateCategory(Category $category): object
-    {
-        $this->manager->flush();
-        return $category;
-    }
-
-    /**
-     * @param Category $category
-     * @return mixed
-     */
-    public function setDeleteCategory(Category $category)
-    {
-        $this->manager->remove($category);
-        $this->manager->flush();
-    }
-
-    /**
-     * @return int
-     */
-    public function countAvailableCategories(): int
+    public function getAll(): array
     {
         return $this->createQueryBuilder('c')
-            ->select('count(c.id)')
-            ->andWhere('c.is_published = :val')
-            ->setParameter('val', true)
-            ->getQuery()
-            ->getSingleScalarResult()
-            ;
-    }
-
-    public function getAvailableCategoriesWithPosts()
-    {
-        return $this->createQueryBuilder('c')
-            ->setParameter('val', true)
-            ->leftJoin('c.posts', 'posts')
+            ->orderBy('c.updated_at', 'DESC')
             ->getQuery()
             ->getResult()
             ;
+    }
+
+    /**
+     * Check if published categories exist
+     *
+     * @return bool
+     * @throws \Doctrine\ORM\NoResultException
+     * @throws \Doctrine\ORM\NonUniqueResultException
+     */
+    public function countAvailableCategories(): bool
+    {
+        return boolval(
+            $this->createQueryBuilder('c')
+                ->select('count(c.id)')
+                ->andWhere('c.is_published = :val')
+                ->setParameter('val', true)
+                ->getQuery()
+                ->getSingleScalarResult()
+        );
     }
 
 }

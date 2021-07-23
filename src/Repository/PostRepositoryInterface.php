@@ -1,26 +1,29 @@
 <?php
 
-
 namespace App\Repository;
 
 
 use App\Entity\Post;
-use Symfony\Component\HttpFoundation\File\UploadedFile;
 
+/**
+ * @method Post|null find($id, $lockMode = null, $lockVersion = null)
+ * @method Post|null findOneBy(array $criteria, array $orderBy = null)
+ * @method Post[]    findAll()
+ * @method Post[]    findBy(array $criteria, array $orderBy = null, $limit = null, $offset = null)
+ */
 interface PostRepositoryInterface
 {
     /**
-     * @param Post $post
-     * @param UploadedFile $file
-     * @return Post
+     * Get all posts sorted by last modified date
+     *
+     * @return Post[]
      */
-    public function setCreatePost(Post $post, UploadedFile $file): self;
+    public function getAll(): array;
 
     /**
-     * @param Post $post
-     * @param UploadedFile $file
-     * @return Post
+     * Check if published categories exist
+     *
+     * @return bool
      */
-    public function setSavePost(Post $post, UploadedFile $file): self;
-
+    public function countAvailableCategories(): bool;
 }

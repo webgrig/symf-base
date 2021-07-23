@@ -57,7 +57,7 @@ class Category
     /**
      * @ORM\Column(type="boolean", nullable=true)
      */
-    private $is_published;
+    private $is_published = true;
 
     /**
      * @ORM\ManyToMany(targetEntity=Post::class, mappedBy="categories")

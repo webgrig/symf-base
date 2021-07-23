@@ -33,7 +33,7 @@ class CategoryController extends BaseController
     {
         $forRender = parent::renderDefault();
         $forRender['title'] = 'Категории';
-        $forRender['categories'] = $this->categoryService->getAllEntities();
+        $forRender['categories'] = $this->categoryService->getAll();
         return $this->render('admin/category/index.html.twig', $forRender);
     }
 

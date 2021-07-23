@@ -54,7 +54,6 @@ class CategoryService implements CategoryServiceInterface
     private $categoryImgDirectory;
 
     /**
-     * CategoryService constructor.
      * @param FormFactoryInterface $formFactory
      * @param EntityManagerInterface $entityManager
      */
@@ -96,24 +95,24 @@ class CategoryService implements CategoryServiceInterface
     }
 
     /**
-     * @return array
+     * @return Category[]
      */
-    public function getAllEntities(): array
+    public function getAll()
     {
-        if (!$categories = $this->em->getRepository(Category::class)->findAll()){
+        if (!$categories = $this->em->getRepository(Category::class)->getAll()){
             $this->session->getFlashBag()->add('error', 'В настоящий момент нет ни одной категории.');
         }
         return $categories;
     }
 
     /**
-     * @return int
+     * @return bool
      */
-    public function countAvailableEntities(): int
+    public function countAvailableEntities(): bool
     {
         $amountAvailableCategories = $this->em->getRepository(Category::class)->countAvailableCategories();
         if (!$amountAvailableCategories){
-            $this->session->getFlashBag()->add('error-available-categories', 'В настоящий момент нет ни одной доступной категории, создание постов невозможно.');;
+            $this->session->getFlashBag()->add('error-available-categories', 'В настоящий момент нет ни одной доступной категории.');;
         }
         return $amountAvailableCategories;
     }
@@ -131,6 +130,22 @@ class CategoryService implements CategoryServiceInterface
 
     /**
      * @param Category $category
+     * @return Category
+     */
+    public function saveImg(Category $category)
+    {
+        if (null !== $file = $this->form->get('img')->getData()){
+            if ($file instanceof UploadedFile){
+                $this->deleteImg($category);
+
+                $category->setImg($this->fm->upload($this->categoryImgDirectory, $file));
+            }
+        }
+        return $category;
+    }
+
+    /**
+     * @param Category $category
      */
     public function deleteImg(Category $category): void
     {
@@ -139,33 +154,25 @@ class CategoryService implements CategoryServiceInterface
         }
     }
 
-
-    /**
+    /**`
      * @param Category $category
-     * @return Category|string
+     * @return CategoryServiceInterface|Category|string
      */
     public function save(Category $category)
     {
-        if (null !== $file = $this->form->get('img')->getData()){
-            if ($file instanceof UploadedFile){
-                $this->deleteImg($category);
-                $category->setImg($this->fm->upload($this->categoryImgDirectory, $file));
-            }
-        }
-        if (!$category->getId()){
-            $this->session->getFlashBag()->add('success', 'Категория создана');
-        }
-        else{
-            $this->session->getFlashBag()->add('success', 'Изменения сохранены');
-        }
+        $category = $this->saveImg($category);
         $this->em->persist($category);
-
+        $entityCreate = !$category->getId() ? true : false;
         try {
             $this->em->flush();
-        } catch (\Exception $e){
+            if ($entityCreate){
+                $this->session->getFlashBag()->add('success', 'Категория создана');
+            }
+            else{
+                $this->session->getFlashBag()->add('success', 'Изменения сохранены');
+            }
+        }catch (\Exception $e){
             $this->deleteImg($category);
-            $this->session->getFlashBag()->add('error', $e->getMessage());
-            return $e->getMessage();
         }
         return $this;
     }

@@ -15,14 +15,14 @@ interface CategoryServiceInterface
     public function createForm(Category $category): object;
 
     /**
-     * @return array
+     * @return Category[]
      */
-    public function getAllEntities(): array;
+    public function getAll();
 
     /**
-     * @return int
+     * @return bool
      */
-    public function countAvailableEntities(): int;
+    public function countAvailableEntities(): bool;
 
     /**
      * @param int $id
@@ -32,12 +32,18 @@ interface CategoryServiceInterface
 
     /**
      * @param Category $category
+     * @return Category
      */
-    public function deleteImg(Category $category): void;
+    public function saveImg(Category $category);
 
     /**
      * @param Category $category
-     * @return Category|string
+     */
+    public function deleteImg(Category $category): void;
+
+    /**`
+     * @param Category $category
+     * @return CategoryServiceInterface|Category|string
      */
     public function save(Category $category);
 

@@ -34,7 +34,7 @@ class UserController extends BaseController
     public function indexAction(){
         $forRender = parent::renderDefault();
         $forRender['title'] = 'Пользователи';
-        $forRender['users'] = $this->userService->getAllEntities();
+        $forRender['users'] = $this->userService->getAll();
         $forRender['cratedEntityId'] = $this->userService->getCratedEntityId();
         return $this->render('admin/user/index.html.twig', $forRender);
     }

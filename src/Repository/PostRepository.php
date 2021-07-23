@@ -2,13 +2,11 @@
 
 namespace App\Repository;
 
+use App\Entity\Category;
 use App\Entity\Post;
-use App\Service\File\FileManagerInterface;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
-use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\Persistence\ManagerRegistry;
-use Symfony\Component\HttpFoundation\File\UploadedFile;
 
 /**
  * @method Post|null find($id, $lockMode = null, $lockVersion = null)
@@ -19,37 +17,34 @@ use Symfony\Component\HttpFoundation\File\UploadedFile;
 class PostRepository extends ServiceEntityRepository implements PostRepositoryInterface
 {
     private $em;
-    private $fm;
 
-    public function __construct(ManagerRegistry $registry, EntityManagerInterface $manager, FileManagerInterface $fileManagerService)
+    public function __construct(ManagerRegistry $registry, EntityManagerInterface $manager)
     {
         $this->em = $manager;
-        $this->fm = $fileManagerService;
         parent::__construct($registry, Post::class);
     }
 
     /**
-     * @param Post $post
-     * @param UploadedFile $file
-     * @return $this|Post
+     * Get all posts sorted by last modified date
+     *
+     * @return Post[]
      */
-    public function setCreatePost(Post $post, UploadedFile $file): PostRepositoryInterface
+    public function getAll(): array
     {
-        $this->em->persist($post);
-        $this->em->flush();
-
-        return $this;
+        return $this->createQueryBuilder('p')
+            ->orderBy('p.updated_at', 'DESC')
+            ->getQuery()
+            ->getResult()
+            ;
     }
 
     /**
-     * @param Post $post
-     * @param UploadedFile $file
-     * @return $this|Post
+     * Check if published categories exist
+     *
+     * @return bool
      */
-    public function setSavePost(Post $post, UploadedFile $file): PostRepositoryInterface
+    public function countAvailableCategories(): bool
     {
-        $this->em->flush();
-
-        return $this;
+        return $this->em->getRepository(Category::class)->countAvailableCategories();
     }
 }

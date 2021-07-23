@@ -8,11 +8,6 @@
                 <h1 class="display-4 text-center mt-5">{{ title }}</h1>
             </div>
         </div>
-        <div class="row no-gutters">
-            <div class="col-12 mt-4 mb-4">
-                <a href="{{ path('admin_user_create') }}" class="btn btn-success">Создать пользователя</a>
-            </div>
-        </div>
 
         <div class="row no-gutters justify-content-center">
             <div class="col-8">
@@ -62,6 +57,12 @@
         </div>
 
         <div class="row no-gutters">
+            <div class="col-12 mt-4 mb-4">
+                <a href="{{ path('admin_user_create') }}" class="btn btn-success">Создать пользователя</a>
+            </div>
+        </div>
+
+        <div class="row no-gutters">
             <div class="col-12 mb-4">
                 <table class="table table-hover border-bottom text-center">
                     <thead>
@@ -78,7 +79,7 @@
                     <tbody>
                     {% for user in users %}
                         <tr>
-                            <td scope="row">{{ user.id }}</td>
+                            <td>{{ user.id }}</td>
                             <td>
                                 {% if user.img is null %}
                                     <img src="{{ asset('uploads/user/no_image.jpg') }}" alt="" width="100">

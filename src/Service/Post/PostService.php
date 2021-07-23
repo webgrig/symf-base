@@ -102,15 +102,21 @@ class PostService implements PostServiceInterface
     }
 
     /**
-     * @return Post[]|mixed|object[]|RedirectResponse
+     * @return Post[]|mixed|object[]
      */
     public function getAll()
     {
-        if (!$this->categoryService->countAvailableEntities()){
-            return new RedirectResponse($this->router->generate('admin_post'));
-        }
+        $this->categoryService->countAvailableEntities();
 
-        return $this->em->getRepository(Post::class)->findAll();
+        return $this->em->getRepository(Post::class)->getAll();
+    }
+
+    /**
+     * @return bool
+     */
+    public function countAvailableCategories(): bool
+    {
+        return $this->categoryService->countAvailableEntities();
     }
 
     /**
@@ -123,6 +129,21 @@ class PostService implements PostServiceInterface
         return $this->em->getRepository(Post::class)->find($id);
     }
 
+    /**
+     * @param Post $post
+     * @return Post
+     */
+    public function saveImg(Post $post)
+    {
+        if (null !== $file = $this->form->get('img')->getData()){
+            if ($file instanceof UploadedFile){
+                $this->deleteImg($post);
+
+                $post->setImg($this->fm->upload($this->postImgDirectory, $file));
+            }
+        }
+        return $post;
+    }
 
     /**
      * @param Post $post
@@ -137,29 +158,23 @@ class PostService implements PostServiceInterface
 
     /**
      * @param Post $post
-     * @return PostServiceInterface|string
+     * @return PostServiceInterface
      */
     public function save(Post $post)
     {
-        if (null !== $file = $this->form->get('img')->getData()){
-            if ($file instanceof UploadedFile){
-                $this->deleteImg($post);
-                $post->setImg($this->fm->upload($this->postImgDirectory, $file));
-            }
-        }
-        if (!$post->getId()){
-            $this->session->getFlashBag()->add('success', 'Пост создан');
-        }
-        else{
-            $this->session->getFlashBag()->add('success', 'Изменения сохранены');
-        }
+        $post = $this->saveImg($post);
         $this->em->persist($post);
+        $entityCreate = !$post->getId() ? true : false;
         try {
             $this->em->flush();
-        } catch (\Exception $e){
+            if ($entityCreate){
+                $this->session->getFlashBag()->add('success', 'Пост создан');
+            }
+            else{
+                $this->session->getFlashBag()->add('success', 'Изменения сохранены');
+            }
+        }catch (\Exception $e){
             $this->deleteImg($post);
-            $this->session->getFlashBag()->add('error', $e->getMessage());
-            return $e->getMessage();
         }
         return $this;
     }

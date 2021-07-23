@@ -4,7 +4,6 @@ namespace App\Service\Post;
 
 use App\Entity\Post;
 use Symfony\Component\Form\Form;
-use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Response;
 
 interface PostServiceInterface
@@ -16,9 +15,14 @@ interface PostServiceInterface
     public function createForm(Post $post): object;
 
     /**
-     * @return Post[]|mixed|object[]|RedirectResponse
+     * @return Post[]|mixed|object[]
      */
     public function getAll();
+
+    /**
+     * @return bool
+     */
+    public function countAvailableCategories(): bool;
 
     /**
      * @param int $id
@@ -28,12 +32,18 @@ interface PostServiceInterface
 
     /**
      * @param Post $post
+     * @return Post
+     */
+    public function saveImg(Post $post);
+
+    /**
+     * @param Post $post
      */
     public function deleteImg(Post $post): void;
 
     /**
      * @param Post $post
-     * @return $this|string
+     * @return $this
      */
     public function save(Post $post);
 

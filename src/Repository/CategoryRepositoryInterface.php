@@ -1,47 +1,31 @@
 <?php
 
-
 namespace App\Repository;
 
 
 use App\Entity\Category;
 
+/**
+ * @method Category|null find($id, $lockMode = null, $lockVersion = null)
+ * @method Category|null findOneBy(array $criteria, array $orderBy = null)
+ * @method Category[]    findAll()
+ * @method Category[]    findBy(array $criteria, array $orderBy = null, $limit = null, $offset = null)
+ */
 interface CategoryRepositoryInterface
 {
     /**
+     * Get all categories sorted by last modified date
+     *
      * @return Category[]
      */
-    public function getAllCategories(): array;
+    public function getAll(): array;
 
     /**
-     * @param int $categoryId
-     * @return object
-     */
-    public function getOneCategory(int $categoryId): object;
-
-    /**
-     * @param Category $category
-     * @return object
-     */
-    public function setCreateCategory(Category $category): object;
-
-    /**
-     * @param Category $category
-     * @return object
-     */
-    public function setSaveCategory(Category $category): object;
-
-    /**
-     * @param Category $category
-     * @return Category
+     * Check if published categories exist
      *
+     * @return bool
+     * @throws \Doctrine\ORM\NoResultException
+     * @throws \Doctrine\ORM\NonUniqueResultException
      */
-    public function setUpdateCategory(Category $category): object;
-
-    /**
-     * @param Category $category
-     */
-    public function setDeleteCategory(Category $category);
-
-
+    public function countAvailableCategories(): bool;
 }

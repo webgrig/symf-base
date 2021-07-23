@@ -37,7 +37,6 @@ class PostController extends BaseController
         $forRender = parent::renderDefault();
         $forRender['title'] = 'Посты';
         $forRender['posts'] = $this->postService->getAll();
-//        dd($forRender['categories']);
         return $this->render('admin/post/index.html.twig', $forRender);
     }
 

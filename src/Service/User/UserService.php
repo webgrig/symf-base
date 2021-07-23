@@ -7,7 +7,7 @@ namespace App\Service\User;
 use App\Entity\Role;
 use App\Entity\User;
 use App\Form\UserType;
-use App\Repository\UserRepositoryInterface;
+use App\Repository\UserRepository;
 use App\Service\File\FileManagerInterface;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Form\Form;
@@ -109,12 +109,9 @@ class UserService implements UserServiceInterface
     /**
      * @return array
      */
-    public function getAllEntities(): array
+    public function getAll(): array
     {
-        $users =  $this->em->getRepository(User::class)->findAll();
-        if (!$users){
-            $this->session->getFlashBag()->add('error', 'В настоящий момент нет ни одной статьи.');
-        }
+        $users =  $this->em->getRepository(User::class)->getAll();
         return $users;
     }
 
@@ -170,6 +167,22 @@ class UserService implements UserServiceInterface
 
     /**
      * @param User $user
+     * @return User
+     */
+    public function saveImg(User $user)
+    {
+        if (null !== $file = $this->form->get('img')->getData()){
+            if ($file instanceof UploadedFile){
+                $this->deleteImg($user);
+
+                $user->setImg($this->fm->upload($this->userImgDirectory, $file));
+            }
+        }
+        return $user;
+    }
+
+    /**
+     * @param User $user
      */
     public function deleteImg(User $user): void
     {
@@ -181,29 +194,23 @@ class UserService implements UserServiceInterface
 
     /**
      * @param User $user
-     * @return UserServiceInterface|string
+     * @return UserServiceInterface
      */
     public function save(User $user)
     {
-        if (null !== $file = $this->form->get('img')->getData()){
-            if ($file instanceof UploadedFile){
-                $this->deleteImg($user);
-                $user->setImg($this->fm->upload($this->userImgDirectory, $file));
-            }
-        }
-        if (!$user->getId()){
-            $this->session->getFlashBag()->add('success_create', 'Пользователь создан');
-        }
-        else{
-            $this->session->getFlashBag()->add('success', 'Изменения сохранены');
-        }
+        $user = $this->saveImg($user);
         $this->em->persist($user);
+        $entityCreate = !$user->getId() ? true : false;
         try {
             $this->em->flush();
-        } catch (\Exception $e){
+            if ($entityCreate){
+                $this->session->getFlashBag()->add('success_create', 'Пользователь создан');
+            }
+            else{
+                $this->session->getFlashBag()->add('success', 'Изменения сохранены');
+            }
+        }catch (\Exception $e){
             $this->deleteImg($user);
-            $this->session->getFlashBag()->add('error', $e->getMessage());
-            return $e->getMessage();
         }
         return $this;
     }
