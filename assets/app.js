@@ -58,6 +58,15 @@ $(document).ready(function () {
         sendAjax(route, categoryId)
     })
 
+    function* enumerate(iterable) {
+        let i = 0;
+
+        for (const x of iterable) {
+            yield [i, x];
+            i++;
+        }
+    }
+
     function sendAjax(route, categoryId){
         let data = new FormData()
         data.append('categoryId', categoryId)
@@ -71,33 +80,31 @@ $(document).ready(function () {
             dataType: 'json',
             data: data,
             success: function (response){
-                console.log(response[0])
 
-                // $('#posts').empty()
-                // for (let post in res){
-                //     var output = ''
-                //     output += '<div class="col-4 p-2">'
-                //     output += '<div class="card text-center">'
-                //
-                //     if (post.img){
-                //         output += '<img class="card-img-top" src="/uploads/post/' + post.img +'" alt="' +  post.title + '">'
-                //     }
-                //     else{
-                //         output += '<img class="card-img-top" src="/uploads/post/no_image.jpg" alt="' + post.title + '">'
-                //     }
-                //     output += '<div class="card-body">'
-                //     for( let category in post.categories){
-                //         output += '<h6 class="text-muted">' + category.title + '</h6>'
-                //     }
-                //     output += '<h5 class="card-title">' + post.title + '</h5>'
-                //     output += '<p class="card-text">' + post.content + '</p>'
-                //     output += '<a href="#" class="btn btn-primary">Читать больше</a>'
-                //     output += '</div>'
-                //     output += '</div>'
-                //     output += '</div>'
-                //     $('#posts').append()
-                // }
-                // $('#posts').append(output)
+                $('#posts').empty()
+                var output = ''
+                for (const [i, post] of enumerate(response)) {
+                    output += '<div class="col-4 p-2">'
+                    output += '<div class="card text-center">'
+
+                    if (post.img){
+                        output += '<img class="card-img-top" src="/uploads/post/' + post.img +'" alt="' +  post.title + '">'
+                    }
+                    else{
+                        output += '<img class="card-img-top" src="/uploads/post/no_image.jpg" alt="' + post.title + '">'
+                    }
+                    output += '<div class="card-body">'
+                    for( let category in post.categories){
+                        output += '<h6 class="text-muted">' + category.title + '</h6>'
+                    }
+                    output += '<h5 class="card-title">' + post.title + '</h5>'
+                    output += '<p class="card-text">' + post.content + '</p>'
+                    output += '<a href="#" class="btn btn-primary">Читать больше</a>'
+                    output += '</div>'
+                    output += '</div>'
+                    output += '</div>'
+                }
+                $('#posts').append(output)
 
             },
             error: function (esrror){
