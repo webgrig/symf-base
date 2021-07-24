@@ -27,5 +27,11 @@ interface PostRepositoryInterface
      */
     public function countAvailableCategories(): bool;
 
+    /**
+     * @param $categoryId
+     * @return Post[]
+     */
+    public function getPostsCategory($categoryId): array;
+
 
 }

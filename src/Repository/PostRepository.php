@@ -63,4 +63,20 @@ class PostRepository extends ServiceEntityRepository implements PostRepositoryIn
             ->getResult()
             ;
     }
+
+    /**
+     * @param $categoryId
+     * @return Post[]
+     */
+    public function getPostsCategory($categoryId): array
+    {
+        return $this->createQueryBuilder('p')
+            ->select('p.id', 'p.title', 'p.content', 'p.img', 'pc.title')
+            ->andWhere('pc.id = :val')
+            ->setParameter('val', $categoryId)
+            ->leftJoin('p.categories', 'pc')
+            ->getQuery()
+            ->getResult()
+            ;
+    }
 }

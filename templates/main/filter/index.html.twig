@@ -1,0 +1,25 @@
+{% extends 'base.html.twig' %}
+{% block title %}{{ title }}{% endblock %}
+{% block body %}
+    <div class="container-fluid mt-3 mb-3">
+        <div class="row no-gutters">
+            <div class="col-12 post-container">
+                <div class="row no-gutters">
+                    <div class="col-4 p-2">
+                        <select name="category_id" id="categories" data-route="{{ path('api_post') }}">
+                            <option value="0">Выберите категорию</option>
+                            {% for category in categories %}
+                                <option value="{{ category.id }}">{{ category.title }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+                <hr>
+                <div class="row no-gutters" id="posts"></div>
+            </div>
+        </div>
+    </div>
+
+
+
+{% endblock %}
