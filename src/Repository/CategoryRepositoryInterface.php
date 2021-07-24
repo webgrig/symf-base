@@ -27,5 +27,5 @@ interface CategoryRepositoryInterface
      * @throws \Doctrine\ORM\NoResultException
      * @throws \Doctrine\ORM\NonUniqueResultException
      */
-    public function countAvailableCategories(): bool;
+    public function checkAvailableCategories(): bool;
 }

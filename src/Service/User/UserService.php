@@ -7,18 +7,17 @@ namespace App\Service\User;
 use App\Entity\Role;
 use App\Entity\User;
 use App\Form\UserType;
-use App\Repository\UserRepository;
 use App\Service\File\FileManagerInterface;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\EntityManagerInterface;
-use Symfony\Component\Form\Form;
 use Symfony\Component\Form\FormFactoryInterface;
+use Symfony\Component\Form\FormInterface;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
 use Symfony\Component\Security\Core\Encoder\UserPasswordEncoderInterface;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\Routing\RouterInterface;
-use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Security\Core\User\UserInterface;
 
 class UserService implements UserServiceInterface
@@ -95,9 +94,8 @@ class UserService implements UserServiceInterface
 
     /**
      * @param User $user
-     * @return Form
+     * @return FormInterface
      */
-
     public function createForm(User $user): object
     {
         $this->form = $this->formFactory->create(UserType::class, $user);
@@ -107,7 +105,7 @@ class UserService implements UserServiceInterface
     }
 
     /**
-     * @return array
+     * @return User[]
      */
     public function getAll(): array
     {
@@ -120,7 +118,7 @@ class UserService implements UserServiceInterface
      * @return User
      */
 
-    public function getEntity(int $id) : object
+    public function getOne(int $id) : object
     {
         return $this->em->getRepository(User::class)->find($id);
     }
@@ -140,9 +138,9 @@ class UserService implements UserServiceInterface
 
     /**
      * @param User $user
-     * @return Role
+     * @return Role[]|Collection
      */
-    public function updateRolesCollection(User $user): object
+    public function updateRolesCollection(User $user): array
     {
         if (null == $user->getId()){
             if (!count($user->getRolesCollection())){
@@ -169,7 +167,7 @@ class UserService implements UserServiceInterface
      * @param User $user
      * @return User
      */
-    public function saveImg(User $user)
+    public function saveImg(User $user): object
     {
         if (null !== $file = $this->form->get('img')->getData()){
             if ($file instanceof UploadedFile){
@@ -194,9 +192,9 @@ class UserService implements UserServiceInterface
 
     /**
      * @param User $user
-     * @return UserServiceInterface
+     * @return User|object
      */
-    public function save(User $user)
+    public function save(User $user): object
     {
         $user = $this->saveImg($user);
         $this->em->persist($user);
@@ -212,7 +210,7 @@ class UserService implements UserServiceInterface
         }catch (\Exception $e){
             $this->deleteImg($user);
         }
-        return $this;
+        return $user;
     }
 
     public function getCratedEntityId()
@@ -225,9 +223,9 @@ class UserService implements UserServiceInterface
 
     /**
      * @param int $id
-     * @return Response
+     * @return RedirectResponse
      */
-    public function delete(int $id): Response
+    public function delete(int $id): RedirectResponse
     {
         $user = $this->em->getRepository(User::class)->find($id);
         if (!in_array('ROLE_SUPER', $this->currentUserOfSession->getRoles())) {

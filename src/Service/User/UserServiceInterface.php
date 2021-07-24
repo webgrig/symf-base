@@ -4,19 +4,20 @@ namespace App\Service\User;
 
 use App\Entity\Role;
 use App\Entity\User;
-use Symfony\Component\Form\Form;
-use Symfony\Component\HttpFoundation\Response;
+use Doctrine\Common\Collections\Collection;
+use Symfony\Component\Form\FormInterface;
+use Symfony\Component\HttpFoundation\RedirectResponse;
 
 interface UserServiceInterface
 {
     /**
      * @param User $user
-     * @return Form
+     * @return FormInterface
      */
     public function createForm(User $user): object;
 
     /**
-     * @return array
+     * @return User[]
      */
     public function getAll(): array;
 
@@ -24,7 +25,7 @@ interface UserServiceInterface
      * @param int $id
      * @return User
      */
-    public function getEntity(int $id): object;
+    public function getOne(int $id): object;
 
     /**
      * @param User $user
@@ -33,15 +34,15 @@ interface UserServiceInterface
 
     /**
      * @param User $user
-     * @return Role
+     * @return Role[]|Collection
      */
-    public function updateRolesCollection(User $user): object;
+    public function updateRolesCollection(User $user): array;
 
     /**
      * @param User $user
      * @return User
      */
-    public function saveImg(User $user);
+    public function saveImg(User $user): object;
 
     /**
      * @param User $user
@@ -50,15 +51,15 @@ interface UserServiceInterface
 
     /**
      * @param User $user
-     * @return $this
+     * @return User|object
      */
-    public function save(User $user);
+    public function save(User $user): object;
 
     public function getCratedEntityId();
 
     /**
      * @param int $id
-     * @return Response
+     * @return RedirectResponse
      */
-    public function delete(int $id): Response;
+    public function delete(int $id): RedirectResponse;
 }

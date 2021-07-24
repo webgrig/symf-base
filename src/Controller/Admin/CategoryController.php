@@ -4,7 +4,6 @@ namespace App\Controller\Admin;
 
 
 use App\Entity\Category;
-use App\Service\Category\CategoryService;
 use App\Service\Category\CategoryServiceInterface;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Response;
@@ -26,10 +25,12 @@ class CategoryController extends BaseController
     {
         $this->categoryService =  $categoryService;
     }
+
     /**
      * @Route("/admin/category", name="admin_category")
+     * @return Response
      */
-    public function indexAction()
+    public function indexAction(): Response
     {
         $forRender = parent::renderDefault();
         $forRender['title'] = 'Категории';
@@ -66,7 +67,7 @@ class CategoryController extends BaseController
      */
     public function updateAction(int $category_id)
     {
-        $category = $this->categoryService->getEntity($category_id);
+        $category = $this->categoryService->getOne($category_id);
         $form = $this->categoryService->createForm($category);
 
         if ($form->isSubmitted() && $form->isValid())

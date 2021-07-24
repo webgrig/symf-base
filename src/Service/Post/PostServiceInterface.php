@@ -3,38 +3,38 @@
 namespace App\Service\Post;
 
 use App\Entity\Post;
-use Symfony\Component\Form\Form;
-use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\Form\FormInterface;
+use Symfony\Component\HttpFoundation\RedirectResponse;
 
 interface PostServiceInterface
 {
     /**
      * @param Post $post
-     * @return Form
+     * @return FormInterface
      */
     public function createForm(Post $post): object;
 
     /**
-     * @return Post[]|mixed|object[]
+     * @return Post[]
      */
-    public function getAll();
+    public function getAll(): array;
 
     /**
      * @return bool
      */
-    public function countAvailableCategories(): bool;
+    public function checkAvailableCategories(): bool;
 
     /**
      * @param int $id
      * @return Post
      */
-    public function getEntity(int $id): object;
+    public function getOne(int $id): object;
 
     /**
      * @param Post $post
      * @return Post
      */
-    public function saveImg(Post $post);
+    public function saveImg(Post $post): object;
 
     /**
      * @param Post $post
@@ -43,13 +43,13 @@ interface PostServiceInterface
 
     /**
      * @param Post $post
-     * @return $this
+     * @return Post
      */
-    public function save(Post $post);
+    public function save(Post $post): object;
 
     /**
      * @param int $id
-     * @return Response
+     * @return RedirectResponse
      */
-    public function delete(int $id): Response;
+    public function delete(int $id): RedirectResponse;
 }

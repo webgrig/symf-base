@@ -5,7 +5,6 @@ namespace App\Controller\Admin;
 
 
 use App\Entity\User;
-use App\Service\User\UserService;
 use App\Service\User\UserServiceInterface;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Response;
@@ -31,7 +30,8 @@ class UserController extends BaseController
      * @Route("/admin/user", name="admin_user")
      * @return Response
      */
-    public function indexAction(){
+    public function indexAction(): Response
+    {
         $forRender = parent::renderDefault();
         $forRender['title'] = 'Пользователи';
         $forRender['users'] = $this->userService->getAll();
@@ -44,7 +44,8 @@ class UserController extends BaseController
      * @return RedirectResponse|Response
      */
 
-    public function createAction(){
+    public function createAction()
+    {
         $user = new User();
         $form = $this->userService->createForm($user);
         if ($form->isSubmitted() && $form->isValid())
@@ -68,7 +69,7 @@ class UserController extends BaseController
      */
     public function updateAction(int $user_id)
     {
-        $user = $this->userService->getEntity($user_id);
+        $user = $this->userService->getOne($user_id);
         $form = $this->userService->createForm($user);
 
         if ($form->isSubmitted() && $form->isValid()){

@@ -8,14 +8,13 @@ use App\Entity\Category;
 use App\Form\CategoryType;
 use App\Service\File\FileManagerInterface;
 use Doctrine\ORM\EntityManagerInterface;
-use Symfony\Component\Form\Form;
 use Symfony\Component\Form\FormFactoryInterface;
+use Symfony\Component\Form\FormInterface;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\Routing\RouterInterface;
-use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Security\Core\User\UserInterface;
 
 class CategoryService implements CategoryServiceInterface
@@ -83,7 +82,7 @@ class CategoryService implements CategoryServiceInterface
 
     /**
      * @param Category $category
-     * @return Form
+     * @return FormInterface
      */
 
     public function createForm(Category $category): object
@@ -97,7 +96,7 @@ class CategoryService implements CategoryServiceInterface
     /**
      * @return Category[]
      */
-    public function getAll()
+    public function getAll(): array
     {
         if (!$categories = $this->em->getRepository(Category::class)->getAll()){
             $this->session->getFlashBag()->add('error', 'В настоящий момент нет ни одной категории.');
@@ -108,9 +107,9 @@ class CategoryService implements CategoryServiceInterface
     /**
      * @return bool
      */
-    public function countAvailableEntities(): bool
+    public function checkAvailableCategories(): bool
     {
-        $amountAvailableCategories = $this->em->getRepository(Category::class)->countAvailableCategories();
+        $amountAvailableCategories = $this->em->getRepository(Category::class)->checkAvailableCategories();
         if (!$amountAvailableCategories){
             $this->session->getFlashBag()->add('error-available-categories', 'В настоящий момент нет ни одной доступной категории.');;
         }
@@ -121,8 +120,7 @@ class CategoryService implements CategoryServiceInterface
      * @param int $id
      * @return Category
      */
-
-    public function getEntity(int $id) : object
+    public function getOne(int $id): object
     {
         return $this->em->getRepository(Category::class)->find($id);
     }
@@ -132,7 +130,7 @@ class CategoryService implements CategoryServiceInterface
      * @param Category $category
      * @return Category
      */
-    public function saveImg(Category $category)
+    public function saveImg(Category $category): object
     {
         if (null !== $file = $this->form->get('img')->getData()){
             if ($file instanceof UploadedFile){
@@ -154,11 +152,11 @@ class CategoryService implements CategoryServiceInterface
         }
     }
 
-    /**`
+    /**
      * @param Category $category
-     * @return CategoryServiceInterface|Category|string
+     * @return Category
      */
-    public function save(Category $category)
+    public function save(Category $category): object
     {
         $category = $this->saveImg($category);
         $this->em->persist($category);
@@ -174,14 +172,14 @@ class CategoryService implements CategoryServiceInterface
         }catch (\Exception $e){
             $this->deleteImg($category);
         }
-        return $this;
+        return $category;
     }
 
     /**
      * @param int $id
-     * @return Response
+     * @return RedirectResponse
      */
-    public function delete(int $id): Response
+    public function delete(int $id): RedirectResponse
     {
         if (!in_array('ROLE_SUPER', $this->currentUserOfSession->getRoles())) {
             $this->session->getFlashBag()->add('error', 'У вас нет прав на удаление категорий');

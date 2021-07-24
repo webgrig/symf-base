@@ -9,14 +9,13 @@ use App\Form\PostType;
 use App\Service\Category\CategoryServiceInterface;
 use App\Service\File\FileManagerInterface;
 use Doctrine\ORM\EntityManagerInterface;
-use Symfony\Component\Form\Form;
 use Symfony\Component\Form\FormFactoryInterface;
+use Symfony\Component\Form\FormInterface;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\Routing\RouterInterface;
-use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Security\Core\User\UserInterface;
 
 class PostService implements PostServiceInterface
@@ -89,9 +88,8 @@ class PostService implements PostServiceInterface
 
     /**
      * @param Post $post
-     * @return Form
+     * @return FormInterface
      */
-
     public function createForm(Post $post): object
     {
         $categories = $this->em->getRepository(Category::class)->findAll();
@@ -102,11 +100,11 @@ class PostService implements PostServiceInterface
     }
 
     /**
-     * @return Post[]|mixed|object[]
+     * @return Post[]
      */
-    public function getAll()
+    public function getAll(): array
     {
-        $this->categoryService->countAvailableEntities();
+        $this->categoryService->checkAvailableCategories();
 
         return $this->em->getRepository(Post::class)->getAll();
     }
@@ -114,9 +112,9 @@ class PostService implements PostServiceInterface
     /**
      * @return bool
      */
-    public function countAvailableCategories(): bool
+    public function checkAvailableCategories(): bool
     {
-        return $this->categoryService->countAvailableEntities();
+        return $this->categoryService->checkAvailableCategories();
     }
 
     /**
@@ -124,7 +122,7 @@ class PostService implements PostServiceInterface
      * @return Post
      */
 
-    public function getEntity(int $id) : object
+    public function getOne(int $id) : object
     {
         return $this->em->getRepository(Post::class)->find($id);
     }
@@ -133,7 +131,7 @@ class PostService implements PostServiceInterface
      * @param Post $post
      * @return Post
      */
-    public function saveImg(Post $post)
+    public function saveImg(Post $post): object
     {
         if (null !== $file = $this->form->get('img')->getData()){
             if ($file instanceof UploadedFile){
@@ -158,9 +156,9 @@ class PostService implements PostServiceInterface
 
     /**
      * @param Post $post
-     * @return PostServiceInterface
+     * @return Post
      */
-    public function save(Post $post)
+    public function save(Post $post): object
     {
         $post = $this->saveImg($post);
         $this->em->persist($post);
@@ -176,14 +174,14 @@ class PostService implements PostServiceInterface
         }catch (\Exception $e){
             $this->deleteImg($post);
         }
-        return $this;
+        return $post;
     }
 
     /**
      * @param int $id
-     * @return Response
+     * @return RedirectResponse
      */
-    public function delete(int $id): Response
+    public function delete(int $id): RedirectResponse
     {
         $this->em->getRepository(Post::class);
         if (!in_array('ROLE_SUPER', $this->currentUserOfSession->getRoles())) {

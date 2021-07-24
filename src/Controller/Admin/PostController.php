@@ -5,7 +5,6 @@ namespace App\Controller\Admin;
 
 
 use App\Entity\Post;
-use App\Service\Post\PostService;
 use App\Service\Post\PostServiceInterface;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Response;
@@ -42,7 +41,7 @@ class PostController extends BaseController
 
     /**
      * @Route("/admin/post/create", name="admin_post_create")
-     * @param RedirectResponse|Response
+     * @return RedirectResponse|Response
      */
     public function createAction()
     {
@@ -70,7 +69,7 @@ class PostController extends BaseController
      */
     public function updateAction(int $post_id)
     {
-        $post = $this->postService->getEntity($post_id);
+        $post = $this->postService->getOne($post_id);
         $form = $this->postService->createForm($post);
 
         if ($form->isSubmitted() && $form->isValid()) {

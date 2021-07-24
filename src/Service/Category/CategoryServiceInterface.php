@@ -3,53 +3,55 @@
 namespace App\Service\Category;
 
 use App\Entity\Category;
-use Symfony\Component\Form\Form;
-use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\Form\FormInterface;
+use Symfony\Component\HttpFoundation\RedirectResponse;
 
 interface CategoryServiceInterface
 {
+
     /**
      * @param Category $category
-     * @return Form
+     * @return FormInterface
      */
+
     public function createForm(Category $category): object;
 
     /**
      * @return Category[]
      */
-    public function getAll();
+    public function getAll(): array;
 
     /**
      * @return bool
      */
-    public function countAvailableEntities(): bool;
+    public function checkAvailableCategories(): bool;
 
     /**
      * @param int $id
      * @return Category
      */
-    public function getEntity(int $id): object;
+    public function getOne(int $id): object;
 
     /**
      * @param Category $category
      * @return Category
      */
-    public function saveImg(Category $category);
+    public function saveImg(Category $category): object;
 
     /**
      * @param Category $category
      */
     public function deleteImg(Category $category): void;
 
-    /**`
+    /**
      * @param Category $category
-     * @return CategoryServiceInterface|Category|string
+     * @return Category
      */
-    public function save(Category $category);
+    public function save(Category $category): object;
 
     /**
      * @param int $id
-     * @return Response
+     * @return RedirectResponse
      */
-    public function delete(int $id): Response;
+    public function delete(int $id): RedirectResponse;
 }

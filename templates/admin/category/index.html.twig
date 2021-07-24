@@ -48,8 +48,8 @@
                     <thead>
                     <tr>
                         <th scope="col" class="w-2">#</th>
-                        <th scope="col" class="w-10">Заголовок</th>
                         <th scope="col" class="w-10">Превью</th>
+                        <th scope="col" class="w-10">Заголовок</th>
                         <th scope="col" class="w-25">Описание</th>
                         <th scope="col" class="w-2">Посты</th>
                         <th scope="col" class="w-2">Опубликована</th>
@@ -68,7 +68,6 @@
                             <tr>
                                 <td>{{ category.id }}</td>
 
-                                <td>{{ category.title }}</td>
                                 <td>
                                     {% if category.img is null %}
 
@@ -78,6 +77,7 @@
                                              width="100">
                                     {% endif %}
                                 </td>
+                                <td>{{ category.title }}</td>
 
                                 <td>{{ category.description }}</td>
 
